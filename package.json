@@ -1,0 +1,57 @@
+{
+  "name": "vue-smart-loading-kit",
+  "version": "0.1.0",
+  "description": "Smart, lightweight, and highly customizable Skeleton and Spinner library for Vue 3",
+  "type": "module",
+  "main": "./dist/vue-smart-loading-kit.umd.cjs",
+  "module": "./dist/vue-smart-loading-kit.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "test": "vitest run",
+    "build": "vite build",
+    "prepublishOnly": "npm test && npm run build"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-smart-loading-kit.js",
+      "require": "./dist/vue-smart-loading-kit.umd.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "vue",
+    "vue3",
+    "skeleton",
+    "spinner",
+    "loading",
+    "ui"
+  ],
+  "author": "Navid Jaberi",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0",
+    "vue-tsc": "^3.3.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/navidjaberi/vue-smart-loading-kit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/navidjaberi/vue-smart-loading-kit/issues"
+  },
+  "homepage": "https://github.com/navidjaberi/vue-smart-loading-kit#readme"
+}
