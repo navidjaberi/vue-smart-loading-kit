@@ -1,6 +1,5 @@
-<!-- playground/src/App.vue -->
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { Skeleton, Spinner } from "vue-smart-loading-kit";
 import type { SkeletonVariantName, SpinnerVariantName } from "vue-smart-loading-kit";
 
@@ -102,7 +101,7 @@ const SKELETONS: Record<SkeletonVariantName, VariantDef> = {
       { key: "iconSize", label: "iconSize", type: "number", min: 8, max: 128, def: 40 },
       { key: "iconColor", label: "iconColor", type: "text", def: "" },
     ],
-    notes: ["Setting height makes ratio irrelevant — clear it to test ratios."],
+    notes: ["Set a height to override the aspect ratio, or leave it empty to size by ratio."],
   },
   profile: {
     name: "Profile",
@@ -112,7 +111,7 @@ const SKELETONS: Record<SkeletonVariantName, VariantDef> = {
       { key: "lines", label: "lines", type: "number", min: 1, max: 6, def: 2 },
       { key: "lineHeight", label: "lineHeight", type: "number", min: 4, max: 32, def: 10 },
     ],
-    notes: ["Avatar must stay perfectly round at every container width."],
+    notes: ["The avatar keeps its size and stays round; the text lines take the remaining width."],
   },
   card: {
     name: "Card",
@@ -129,7 +128,7 @@ const SKELETONS: Record<SkeletonVariantName, VariantDef> = {
       { key: "radius", label: "radius", type: "text", def: "14px" },
       { key: "borderWidth", label: "borderWidth", type: "text", def: "1px" },
     ],
-    notes: ["In horizontal layout the media block must stay square when the card is narrow."],
+    notes: ["In the horizontal layout the media block stays square, even in a narrow container."],
   },
   article: {
     name: "Article",
@@ -163,9 +162,9 @@ const SKELETONS: Record<SkeletonVariantName, VariantDef> = {
       { key: "footerAlign", label: "footerAlign", type: "select", opts: ["between", "start", "end"], def: "between" },
     ],
     notes: [
-      "With minColumnWidth > 0 and many columns, narrow widths should scroll horizontally — not squash.",
-      "With minColumnWidth = 0, columns squash to fit instead. Compare both in the width tester.",
-      "align now shifts the bar itself (margin auto) since the wrapper must stay 100% wide for cellWidths percentages to resolve.",
+      "Set minColumnWidth to keep columns readable: narrow containers scroll horizontally instead of squashing.",
+      "Leave minColumnWidth at 0 to squash columns to fit. Try both with the width slider on the preview.",
+      "align positions each bar inside its cell.",
     ],
   },
   list: {
@@ -181,7 +180,7 @@ const SKELETONS: Record<SkeletonVariantName, VariantDef> = {
       { key: "subtitleWidth", label: "subtitleWidth", type: "text", def: "52%" },
       { key: "itemGap", label: "itemGap", type: "number", min: 0, max: 40, def: 12 },
     ],
-    notes: ["The divider must never render after the last item."],
+    notes: ["Dividers appear only between items, never after the last one."],
   },
   grid: {
     name: "Grid",
@@ -195,7 +194,7 @@ const SKELETONS: Record<SkeletonVariantName, VariantDef> = {
       { key: "itemHeight", label: "itemHeight", type: "number", min: 40, max: 320, def: 140 },
       { key: "itemRadius", label: "itemRadius", type: "number", min: 0, max: 40, def: 12 },
     ],
-    notes: ["minItemWidth > 0 switches to auto-fit: column count follows the container, not the viewport."],
+    notes: ["Set minItemWidth to make the grid fluid: the column count follows the container, not the viewport."],
   },
 };
 
@@ -228,6 +227,14 @@ const skeletonKeys = Object.keys(SKELETONS) as SkeletonVariantName[];
 const spinnerKeys = Object.keys(SPINNERS) as SpinnerVariantName[];
 
 const catalog = computed(() => CATALOGS[family.value]);
+
+/* On narrow screens the menu groups become horizontally scrolling rows,
+   so the selected item can sit off-screen; keep it in view. */
+function revealActiveNav() {
+  nextTick(() =>
+    document.querySelector(".nav--on")?.scrollIntoView({ block: "nearest", inline: "nearest" })
+  );
+}
 const def = computed<VariantDef>(() => catalog.value[current.value] ?? { name: "?", blurb: "" });
 
 /** Global skeleton appearance */
@@ -479,6 +486,9 @@ async function copySnippet() {
 
 const compare = ref(false);
 
+watch([family, current, compare], revealActiveNav);
+onMounted(revealActiveNav);
+
 function pick(fam: "skeleton" | "spinner", key: string) {
   family.value = fam;
   current.value = key;
@@ -492,7 +502,11 @@ function pick(fam: "skeleton" | "spinner", key: string) {
     <aside class="side">
       <div class="brand">
         <strong>vue-smart-loading-kit</strong>
-        <span>playground</span>
+        <span>Interactive demo</span>
+        <nav class="brand__links">
+          <a href="https://github.com/navidjaberi/vue-smart-loading-kit" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.npmjs.com/package/vue-smart-loading-kit" target="_blank" rel="noopener">npm</a>
+        </nav>
       </div>
 
       <div class="group">
@@ -536,8 +550,7 @@ function pick(fam: "skeleton" | "spinner", key: string) {
         <header class="head">
           <h1>All {{ family === 'skeleton' ? 'skeletons' : 'spinners' }}</h1>
           <p class="sub">
-            Every variant with the current global settings — useful for
-            spotting one that looks off next to the rest.
+            Every variant side by side, using the current appearance settings.
           </p>
         </header>
 
@@ -590,7 +603,7 @@ function pick(fam: "skeleton" | "spinner", key: string) {
           <div class="panel__bar">
             <span class="panel__title">Preview</span>
             <div class="chips">
-              <input v-model.number="testWidth" type="range" min="140" max="1280" />
+              <input v-model.number="testWidth" type="range" min="140" max="1280" aria-label="Preview container width" title="Preview container width" />
               <span class="px">{{ testWidth }}px</span>
               <button class="chip" @click="dark = !dark">
                 {{ dark ? "Light" : "Dark" }}
@@ -786,8 +799,9 @@ function pick(fam: "skeleton" | "spinner", key: string) {
         <section class="panel panel--muted">
           <div class="panel__bar"><span class="panel__title">Reduced motion</span></div>
           <p class="note">
-            Turn on "reduce motion" in your OS or browser settings and reload —
-            every animation above should stop.
+            With "reduce motion" turned on in your OS or browser, skeleton
+            animations stop and spinners slow to half speed. Turn it on and
+            reload to see it.
           </p>
         </section>
       </template>
@@ -845,6 +859,19 @@ function pick(fam: "skeleton" | "spinner", key: string) {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+.brand__links {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+.brand__links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.brand__links a:hover {
+  text-decoration: underline;
 }
 
 .group {
@@ -1160,6 +1187,27 @@ function pick(fam: "skeleton" | "spinner", key: string) {
     height: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line);
+    padding: 16px 12px 8px;
+  }
+  /* A 22-item vertical menu would fill the whole first screen on a phone:
+     lay each group out as one horizontally scrolling row instead. */
+  .group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .group__title {
+    flex: none;
+    padding: 0 4px 0 8px;
+  }
+  .nav {
+    flex: none;
+    width: auto;
+    white-space: nowrap;
   }
   .main {
     padding: 20px 16px 48px;

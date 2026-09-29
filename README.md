@@ -361,6 +361,14 @@ Install dependencies:
 npm install
 ```
 
+Start the interactive playground, which imports the components straight from `src/` so edits show up live:
+
+```bash
+npm run dev
+```
+
+Every variant has its own controls and a copyable code snippet, plus a view that compares all variants side by side. The playground lives in `playground/` and is not part of the published package.
+
 Run tests:
 
 ```bash
