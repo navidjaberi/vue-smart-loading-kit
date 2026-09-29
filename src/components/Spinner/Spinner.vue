@@ -8,47 +8,42 @@ import Ring from "./variants/Ring.vue";
 import Orbit from "./variants/Orbit.vue";
 import PulseDots from "./variants/PulseDots.vue";
 import OrbitDots from "./variants/OrbitDots.vue";
-
-export type SpinnerType =
-  | "circle"
-  | "dots"
-  | "pulse"
-  | "bars"
-  | "ring"
-  | "orbit"
-  | "pulseDots"
-  | "orbitDots";
-
-export interface SpinnerProps {
-  type?: SpinnerType;
-  size?: number | string;
-  color?: string;
-  speed?: number;
-  thickness?: number;
-  label?: string;
-}
+import type { Component } from "vue";
+import type { SpinnerProps, SpinnerVariantName } from "./spinner.types";
+import { usePrefersReducedMotion } from "../../utils/usePrefersReducedMotion";
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
-  type: "circle",
   size: 40,
   color: "#3b82f6",
   speed: 1,
   thickness: 4,
 });
 
-const variants: Record<string, any> = {
+/* A spinner that stops entirely reads as a frozen page, so reduced
+   motion slows it down instead of disabling it (unlike Skeleton). */
+const REDUCED_MOTION_SPEED_FACTOR = 0.5;
+const prefersReducedMotion = usePrefersReducedMotion();
+const effectiveSpeed = computed(() =>
+  prefersReducedMotion.value ? props.speed * REDUCED_MOTION_SPEED_FACTOR : props.speed
+);
+
+const variants: Record<SpinnerVariantName, Component> = {
   circle: Circle,
   dots: Dots,
   pulse: Pulse,
   bars: Bars,
   ring: Ring,
   orbit: Orbit,
-  pulseDots: PulseDots,
-  orbitDots: OrbitDots,
+  "pulse-dots": PulseDots,
+  "orbit-dots": OrbitDots,
 };
 
+/** `variant` wins over the deprecated `type`; camelCase names are
+ *  normalized to kebab-case so both v0.1.0 spellings keep working. */
 const component = computed(() => {
-  return variants[props.type] || Circle;
+  const raw = props.variant ?? props.type ?? "circle";
+  const name = raw.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+  return variants[name as SpinnerVariantName] ?? Circle;
 });
 </script>
 
@@ -63,7 +58,7 @@ const component = computed(() => {
       :is="component"
       :size="props.size"
       :color="props.color"
-      :speed="props.speed"
+      :speed="effectiveSpeed"
       :thickness="props.thickness"
     />
     <span v-if="props.label" class="vslk-sr-only">{{ props.label }}</span>

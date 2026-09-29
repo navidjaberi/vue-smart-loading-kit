@@ -1,25 +1,44 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { scaleSize, toCssSize, toPx } from "../../../utils/size";
 
-const props = defineProps<{
-  size: number;
-  color: string;
-  speed: number;
-}>();
+interface Props {
+  size?: number | string;
+  color?: string;
+  speed?: number;
+}
 
-const dotSize = computed(() => props.size / 4);
-const duration = computed(() => 1 / props.speed);
-const angle = 120; 
-const orbitRadius = computed(() => (props.size - dotSize.value) / 2);
-const inwardOffset = computed(() => orbitRadius.value * 0.28);
+const props = withDefaults(defineProps<Props>(), {
+  size: 40,
+  color: "#3b82f6",
+  speed: 1,
+});
+
+const boxSize = computed(() => toCssSize(props.size));
+const dotSize = computed(() => scaleSize(props.size, "/", 4));
+const duration = computed(() => 1 / (props.speed > 0 ? props.speed : 1));
+const angle = 120;
+
+/** (size - dot) / 2, i.e. size * 3/8, and 28% of that for the inward pulse. */
+const px = computed(() => toPx(props.size));
+const orbitRadius = computed(() =>
+  px.value != null
+    ? `${(px.value - px.value / 4) / 2}px`
+    : `calc(${props.size} * 0.375)`
+);
+const inwardOffset = computed(() =>
+  px.value != null
+    ? `${((px.value - px.value / 4) / 2) * 0.28}px`
+    : `calc(${props.size} * 0.105)`
+);
 </script>
 
 <template>
   <div
     class="vslk-spinner-orbit-dots"
     :style="{
-      width: props.size + 'px',
-      height: props.size + 'px',
+      width: boxSize,
+      height: boxSize,
       animationDuration: duration + 's',
     }"
   >
@@ -34,19 +53,19 @@ const inwardOffset = computed(() => orbitRadius.value * 0.28);
       <span
         class="dot-orbit"
         :style="{
-          transform: `translate(-50%, calc(-50% - ${orbitRadius}px))`,
+          transform: `translate(-50%, calc(-50% - ${orbitRadius}))`,
         }"
       >
         <span
           class="dot-core"
           :style="{
-            width: dotSize + 'px',
-            height: dotSize + 'px',
-            backgroundColor: color,
+            width: dotSize,
+            height: dotSize,
+            backgroundColor: props.color,
             animationDuration: duration + 's',
             animationDelay: (-(i - 1) * duration) / 3 + 's',
-            '--orbit-radius': orbitRadius + 'px',
-            '--inward-offset': inwardOffset + 'px',
+            '--orbit-radius': orbitRadius,
+            '--inward-offset': inwardOffset,
           }"
         />
       </span>

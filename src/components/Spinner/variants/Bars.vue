@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { scaleSize, toCssSize } from "../../../utils/size";
 
 interface Props {
   size?: string | number;
@@ -13,20 +14,9 @@ const props = withDefaults(defineProps<Props>(), {
   speed: 1,
 });
 
-const containerHeight = computed(() => {
-  return typeof props.size === "number"
-    ? `${props.size}px`
-    : props.size;
-});
-
-const numericSize = computed(() => {
-  return typeof props.size === "number"
-    ? props.size
-    : parseInt(props.size, 10) || 40;
-});
-
-const barWidth = computed(() => `${numericSize.value / 8}px`);
-const gapSize = computed(() => `${numericSize.value / 10}px`);
+const containerHeight = computed(() => toCssSize(props.size));
+const barWidth = computed(() => scaleSize(props.size, "/", 8));
+const gapSize = computed(() => scaleSize(props.size, "/", 10));
 
 const duration = computed(() => {
   const safeSpeed =

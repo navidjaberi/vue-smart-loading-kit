@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import type { SkeletonBaseProps } from "../types";
 
 interface ImageOptions {
   ratio?: string;
@@ -8,12 +9,7 @@ interface ImageOptions {
   iconColor?: string;
 }
 
-const props = defineProps<{
-  width?: string | number;
-  height?: string | number;
-  radius?: string | number;
-  options?: ImageOptions;
-}>();
+const props = defineProps<SkeletonBaseProps & { options?: ImageOptions }>();
 
 const showIcon = computed(() => props.options?.icon ?? true);
 
@@ -81,8 +77,6 @@ const containerStyle = computed<Record<string, string>>(() => {
   <div
     class="vslk-sk-shape vslk-sk-image"
     :style="containerStyle"
-    role="img"
-    aria-label="Loading image"
   >
     <svg
       v-if="showIcon"

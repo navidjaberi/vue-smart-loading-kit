@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { scaleSize, toCssSize } from '../../../utils/size'
 
 interface Props {
-  size?: number
+  size?: number | string
   color?: string
   speed?: number
 }
@@ -13,7 +14,8 @@ const props = withDefaults(defineProps<Props>(), {
   speed: 1,
 })
 
-const dotSize = computed(() => props.size / 5)
+const boxSize = computed(() => toCssSize(props.size))
+const dotSize = computed(() => scaleSize(props.size, '/', 5))
 
 const duration = computed(() => {
   const speed = props.speed > 0 ? props.speed : 1
@@ -25,8 +27,8 @@ const duration = computed(() => {
   <div
     class="vslk-pulse-orbit"
     :style="{
-      width: props.size + 'px',
-      height: props.size + 'px'
+      width: boxSize,
+      height: boxSize
     }"
   >
     <span
@@ -34,8 +36,8 @@ const duration = computed(() => {
       :key="i"
       class="dot"
       :style="{
-        width: dotSize + 'px',
-        height: dotSize + 'px',
+        width: dotSize,
+        height: dotSize,
         backgroundColor: props.color,
         animationDuration: duration + 's',
         animationDelay: ((i - 1) * duration / 3) + 's'

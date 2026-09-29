@@ -137,12 +137,13 @@ describe("Skeleton / Image Variant", () => {
     expect(image.classes()).toContain("vslk-sk-image");
   });
 
-  it("renders accessibility attributes (role/img + aria-label)", () => {
+  it("leaves a11y semantics to the Skeleton container (no role/aria-label)", () => {
     const wrapper = mountImage();
     const image = findImageRoot(wrapper);
 
-    expect(image.attributes("role")).toBe("img");
-    expect(image.attributes("aria-label")).toBe("Loading image");
+    expect(image.attributes("role")).toBeUndefined();
+    expect(image.attributes("aria-label")).toBeUndefined();
+    expect(wrapper.attributes("aria-hidden")).toBe("true");
   });
 
   it("renders the icon by default", () => {

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { toCssSize } from "../../../utils/size";
+
 interface Props {
-  size?: number;
+  size?: number | string;
   color?: string;
   speed?: number;
   thickness?: number;
@@ -18,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
   <div
     class="spinner-ring"
     :style="{
-      width: props.size + 'px',
+      width: toCssSize(props.size),
     }"
   >
     <div

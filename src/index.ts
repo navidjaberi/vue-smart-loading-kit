@@ -2,7 +2,16 @@ import type { App } from 'vue'
 import Skeleton from './components/Skeleton/Skeleton.vue'
 import Spinner from './components/Spinner/Spinner.vue'
 export { Skeleton, Spinner }
-import './style.css'
+export type {
+  SkeletonBaseProps,
+  SkeletonVariantName,
+  SkeletonAnimationName,
+} from './components/Skeleton/types'
+export type {
+  SpinnerProps,
+  SpinnerVariantName,
+  SpinnerType,
+} from './components/Spinner/spinner.types'
 export default {
   install(app: App) {
     app.component('Skeleton', Skeleton)

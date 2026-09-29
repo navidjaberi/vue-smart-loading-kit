@@ -193,4 +193,28 @@ describe("Circle Variant", () => {
     expect(style).toContain("--vslk-sk-outline-w: 1px");
     expect(style).toContain("--vslk-sk-outline-style: solid");
   });
+
+  it.each([
+    [{ size: "4rem" }, "4rem"],
+    [{ size: "50%" }, "50%"],
+    [{ width: "3em" }, "3em"],
+    [{ height: "2.5rem" }, "2.5rem"],
+  ])("accepts CSS string sizes %j", (sizeProps, expected) => {
+    const wrapper = mount(Skeleton, {
+      props: { variant: "circle", ...sizeProps },
+    });
+
+    expect(wrapper.find(".vslk-sk-shape").element).toHaveStyle({
+      width: expected,
+      height: expected,
+    });
+  });
+
+  it("prioritizes a string size over a numeric width", () => {
+    const wrapper = mount(Skeleton, {
+      props: { variant: "circle", size: "4rem", width: 100 },
+    });
+
+    expect(wrapper.find(".vslk-sk-shape").element).toHaveStyle({ width: "4rem" });
+  });
 });

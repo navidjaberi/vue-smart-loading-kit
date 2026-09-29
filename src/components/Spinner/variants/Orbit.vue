@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { scaleSize, toCssSize, toPx } from "../../../utils/size";
 
 interface Props {
   size?: number | string;
@@ -13,15 +14,13 @@ const props = withDefaults(defineProps<Props>(), {
   speed: 1,
 });
 
-const numericSize = computed(() => {
-  return typeof props.size === "number"
-    ? props.size
-    : parseInt(props.size) || 48;
+const ringSize = computed(() => toCssSize(props.size));
+const dotSize = computed(() => scaleSize(props.size, "*", 0.16));
+/** Distance from the center to the dot's center: (ring - dot) / 2. */
+const radius = computed(() => {
+  const px = toPx(props.size);
+  return px != null ? `${(px - px * 0.16) / 2}px` : `calc(${props.size} * 0.42)`;
 });
-
-const dotSize = computed(() => numericSize.value * 0.16);
-const ringSize = computed(() => numericSize.value);
-const radius = computed(() => (ringSize.value - dotSize.value) / 2);
 
 const duration = computed(() => {
   const safeSpeed =
@@ -31,11 +30,11 @@ const duration = computed(() => {
 });
 
 const orbitStyle = computed(() => ({
-  width: `${ringSize.value}px`,
-  height: `${ringSize.value}px`,
-  "--vslk-size": `${ringSize.value}px`,
-  "--vslk-dot-size": `${dotSize.value}px`,
-  "--vslk-radius": `${radius.value}px`,
+  width: ringSize.value,
+  height: ringSize.value,
+  "--vslk-size": ringSize.value,
+  "--vslk-dot-size": dotSize.value,
+  "--vslk-radius": radius.value,
   "--vslk-color": props.color,
   "--vslk-duration": duration.value,
 }));

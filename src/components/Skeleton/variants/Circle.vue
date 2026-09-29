@@ -2,15 +2,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { SkeletonBaseProps } from '../types'
+import { toCssSize } from '../../../utils/size'
 
 const props = defineProps<SkeletonBaseProps>()
 
-const s = computed(() => {
-  if (typeof props.size === 'number') return `${props.size}px`
-  if (typeof props.width === 'number') return `${props.width}px`
-  if (typeof props.height === 'number') return `${props.height}px`
-  return '40px'
-})
+/** A circle has one dimension: the first of size → width → height. */
+const s = computed(() => toCssSize(props.size ?? props.width ?? props.height ?? 40))
 </script>
 
 <template>

@@ -4,6 +4,8 @@ import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [vue()],
+  // public/ holds demo assets only; keep them out of the published dist
+  publicDir: false,
 
   resolve: {
     alias: {

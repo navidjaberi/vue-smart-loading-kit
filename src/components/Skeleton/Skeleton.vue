@@ -22,6 +22,14 @@ const props = withDefaults(
 
 const Comp = computed(() => skeletonVariants[props.variant ?? "block"]);
 
+/* `variant` and `label` belong to this wrapper only. Variants don't
+   declare them, so passing them down would render them as stray HTML
+   attributes (e.g. <div variant="avatar" label="...">). */
+const variantProps = computed(() => {
+  const { variant, label, ...rest } = props;
+  return rest;
+});
+
 const resolvedBase = computed(() => props.color ?? "rgba(148, 163, 184, 0.22)");
 
 const resolvedHighlight = computed(() => {
@@ -128,7 +136,7 @@ const skAngle = computed(() => {
         : { 'aria-hidden': 'true' }
     "
   >
-    <component :is="Comp" v-bind="props" />
+    <component :is="Comp" v-bind="variantProps" />
     <span v-if="props.label" class="vslk-sr-only">{{ props.label }}</span>
   </div>
 </template>
