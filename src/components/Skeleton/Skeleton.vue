@@ -1,6 +1,6 @@
 <!-- src/components/skeleton/VSkeleton.vue -->
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, warn } from "vue";
 import { skeletonVariants } from "./variants";
 import type { SkeletonBaseProps, SkeletonVariantName } from "./types";
 import { generateAutoHighlight } from "./utils/color";
@@ -25,7 +25,20 @@ const props = withDefaults(
   }
 );
 
-const Comp = computed(() => skeletonVariants[props.variant ?? "block"]);
+/* An unknown variant (a typo, or a name from a newer version) would
+   otherwise render an empty, zero-height box with no hint why. Fall back
+   to the plain block and say so; Vue's `warn` is a no-op in production. */
+const resolvedVariant = computed<SkeletonVariantName>(() => {
+  const name = props.variant ?? "block";
+  if (Object.prototype.hasOwnProperty.call(skeletonVariants, name)) return name;
+  warn(
+    `[vue-smart-loading-kit] Unknown Skeleton variant "${name}", rendering "block" instead. ` +
+      `Valid variants: ${Object.keys(skeletonVariants).join(", ")}.`
+  );
+  return "block";
+});
+
+const Comp = computed(() => skeletonVariants[resolvedVariant.value]);
 
 /* `variant` and `label` belong to this wrapper only. Variants don't
    declare them, so passing them down would render them as stray HTML
@@ -84,7 +97,7 @@ const outlinedCfg = computed(() => {
     class="vslk-skeleton-container"
     :class="[
       `vslk-sk--anim-${normalizedAnimation}`,
-      `vslk-sk--v-${props.variant}`,
+      `vslk-sk--v-${resolvedVariant}`,
       { 'vslk-sk--outlined': outlinedCfg.enabled },
     ]"
     :style="{

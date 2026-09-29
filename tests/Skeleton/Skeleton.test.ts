@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import Skeleton from "../../src/components/Skeleton/Skeleton.vue";
 import { skeletonVariants } from "../../src/components/Skeleton/variants";
@@ -90,4 +90,47 @@ describe("Skeleton accessibility", () => {
       }
     }
   );
+});
+
+describe("Skeleton with an unknown variant", () => {
+  it("falls back to block instead of rendering an empty box", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const wrapper = mount(Skeleton, { props: { variant: "navbar" as any } });
+
+    expect(wrapper.findAll(".vslk-sk-shape")).toHaveLength(1);
+    expect(wrapper.classes()).toContain("vslk-sk--v-block");
+    warn.mockRestore();
+  });
+
+  it("warns once, naming the bad variant and the valid ones", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mount(Skeleton, { props: { variant: "navbar" as any } });
+
+    const messages = warn.mock.calls.map((args) => String(args[0]));
+    const ours = messages.filter((m) => m.includes('"navbar"'));
+    expect(ours).toHaveLength(1);
+    expect(ours[0]).toContain("block");
+    expect(ours[0]).toContain("table");
+    warn.mockRestore();
+  });
+
+  it.each(["toString", "constructor", "__proto__"])(
+    "treats inherited object keys like %s as unknown",
+    (variant) => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const wrapper = mount(Skeleton, { props: { variant: variant as any } });
+
+      expect(wrapper.classes()).toContain("vslk-sk--v-block");
+      expect(wrapper.findAll(".vslk-sk-shape")).toHaveLength(1);
+      warn.mockRestore();
+    }
+  );
+
+  it("does not warn for valid variants", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    for (const variant of variantNames) mount(Skeleton, { props: { variant } });
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
 });
