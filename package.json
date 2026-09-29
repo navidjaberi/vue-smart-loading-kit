@@ -7,9 +7,11 @@
   "module": "./dist/vue-smart-loading-kit.js",
   "types": "./dist/index.d.ts",
   "scripts": {
+    "dev": "vite playground",
     "test": "vitest run",
     "build": "vite build && vue-tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm test && npm run build"
+    "prepublishOnly": "npm test && npm run build",
+    "build:playground": "vue-tsc -b playground && vite build playground"
   },
   "exports": {
     ".": {
@@ -40,8 +42,10 @@
   ],
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
+    "@types/node": "^24.19.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.5.1",
+    "@vue/tsconfig": "^0.9.1",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.28",
     "typescript": "^7.0.2",
