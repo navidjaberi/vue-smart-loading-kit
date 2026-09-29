@@ -81,7 +81,7 @@ describe("Ring Variant", () => {
     expect(segment.attributes("style")).not.toContain("Infinity");
   });
 
-  it("falls back to Spinner's defaults (size 40, color #3b82f6, speed 1, thickness 4) when omitted", () => {
+  it("falls back to Spinner's defaults (size 40, color currentColor, speed 1, thickness 4) when omitted", () => {
     const wrapper = mount(Spinner, {
       props: { type: "ring" },
     });
@@ -95,7 +95,8 @@ describe("Ring Variant", () => {
       borderWidth: "4px",
       animationDuration: "1s",
     });
-    expect(segmentStyle.borderTopColor).toBe("rgb(59, 130, 246)");
+    // inline value: computed style would already resolve currentColor to the text color
+    expect((segment.element as HTMLElement).style.borderTopColor.toLowerCase()).toBe("currentcolor");
     expect(segmentStyle.borderRightColor).toBe("rgba(0, 0, 0, 0)");
   });
 });

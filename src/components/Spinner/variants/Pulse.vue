@@ -9,7 +9,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 40,
-  color: "#3b82f6",
+  color: "currentColor",
   speed: 1,
 });
 
@@ -31,6 +31,7 @@ const formattedDuration = computed(() => {
 const pulseStyle = computed(() => ({
   width: formattedSize.value,
   height: formattedSize.value,
+  color: props.color,
   "--vslk-pulse-color": props.color,
   "--vslk-pulse-duration": formattedDuration.value,
 }));

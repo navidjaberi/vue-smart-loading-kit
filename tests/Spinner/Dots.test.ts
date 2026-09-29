@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import Spinner from "../../src/components/Spinner/Spinner.vue";
 
 const durationOf = (speed: number) => 1 / speed
-const gapOf = (size: number) => size / 5.5
+const gapOf = (size: number) => size / 8 // 3 dots of size/4 + 2 gaps fill one size
 
 describe('Spinner - Dots Variant', () => {
   it('renders correctly with default props', () => {
@@ -18,7 +18,7 @@ describe('Spinner - Dots Variant', () => {
     expect(dots).toHaveLength(3)
 
     const gap = parseFloat((container.element as HTMLElement).style.gap)
-    expect(gap).toBeCloseTo(gapOf(40), 6) // 7.272727...
+    expect(gap).toBeCloseTo(gapOf(40), 6) // 5
 
     const d0 = (dots[0].element as HTMLElement).style
     const d1 = (dots[1].element as HTMLElement).style
@@ -26,7 +26,7 @@ describe('Spinner - Dots Variant', () => {
 
     expect(d0.width).toBe('10px')
     expect(d0.height).toBe('10px')
-    expect(d0.backgroundColor).toBe('rgb(59, 130, 246)') // #3b82f6
+    expect(d0.backgroundColor.toLowerCase()).toBe('currentcolor')
     expect(d0.animationDuration).toBe('1s')
 
     // delay is staggered by index; first dot starts at 0
@@ -44,7 +44,7 @@ describe('Spinner - Dots Variant', () => {
     const firstDot = wrapper.find('.vslk-spinner-dots span')
 
     const gap = parseFloat((container.element as HTMLElement).style.gap)
-    expect(gap).toBeCloseTo(gapOf(80), 6) // 14.545454...
+    expect(gap).toBeCloseTo(gapOf(80), 6) // 10
 
     expect((firstDot.element as HTMLElement).style.width).toBe('20px')
   })

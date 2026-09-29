@@ -97,7 +97,7 @@ describe("PulseDots Variant", () => {
     expect(delays[2]).toBeCloseTo(2 / 3, 5);
   });
 
-  it("falls back to Spinner's defaults (size 40, color #3b82f6, speed 1) when omitted", () => {
+  it("falls back to Spinner's defaults (size 40, color currentColor, speed 1) when omitted", () => {
     const wrapper = mount(Spinner, {
       props: { type: "pulseDots" },
     });
@@ -106,10 +106,7 @@ describe("PulseDots Variant", () => {
     const dot = wrapper.find(".dot");
 
     expect(container.element).toHaveStyle({ width: "40px", height: "40px" });
-    expect(dot.element).toHaveStyle({
-      width: "8px",
-      backgroundColor: "#3b82f6",
-      animationDuration: "1s",
-    });
+    expect(dot.element).toHaveStyle({ width: "8px", animationDuration: "1s" });
+    expect((dot.element as HTMLElement).style.backgroundColor.toLowerCase()).toBe("currentcolor");
   });
 });

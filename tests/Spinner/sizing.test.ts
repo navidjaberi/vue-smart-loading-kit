@@ -21,6 +21,7 @@ const sizedParts: [SpinnerVariantName, string, string][] = [
   ["pulse-dots", ".vslk-pulse-orbit .dot", "width"],
   ["orbit-dots", ".vslk-spinner-orbit-dots", "width"],
   ["orbit-dots", ".vslk-spinner-orbit-dots .dot-core", "width"],
+  ["arc", "svg.vslk-spinner-arc", "width"],
 ];
 
 const allVariants = [...new Set(sizedParts.map(([v]) => v))];

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { scaleSize } from "../../../utils/size";
+import { scaleSize, toCssSize } from "../../../utils/size";
 
 interface Props {
   size?: string | number;
@@ -10,12 +10,14 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 40,
-  color: "#3b82f6",
+  color: "currentColor",
   speed: 1,
 });
 
 const dotSize = computed(() => scaleSize(props.size, "/", 4));
-const gapSize = computed(() => scaleSize(props.size, "/", 5.5));
+const boxSize = computed(() => toCssSize(props.size));
+// three dots of size/4 plus two gaps of size/8 fill exactly one `size`
+const gapSize = computed(() => scaleSize(props.size, "/", 8));
 
 const duration = computed(() => {
   return props.speed > 0 ? 1 / props.speed : 1;
@@ -29,7 +31,10 @@ const getAnimationDelay = (index: number) => {
 </script>
 
 <template>
-  <div class="vslk-spinner-dots" :style="{ gap: gapSize }" >
+  <div
+    class="vslk-spinner-dots"
+    :style="{ width: boxSize, height: boxSize, gap: gapSize, color: props.color }"
+  >
     <span
       v-for="n in 3"
       :key="n"

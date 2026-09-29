@@ -29,7 +29,7 @@ describe("Spinner - Orbit Variant", () => {
     expect(orbitElement.style.getPropertyValue("--vslk-size")).toBe("40px");
     expect(orbitElement.style.getPropertyValue("--vslk-dot-size")).toBe("6.4px");
     expect(orbitElement.style.getPropertyValue("--vslk-radius")).toBe("16.8px");
-    expect(orbitElement.style.getPropertyValue("--vslk-color")).toBe("#3b82f6");
+    expect(orbitElement.style.getPropertyValue("--vslk-color")).toBe("currentColor");
     expect(orbitElement.style.getPropertyValue("--vslk-duration")).toBe("1s");
     
 

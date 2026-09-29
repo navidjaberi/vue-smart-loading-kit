@@ -10,7 +10,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 40,
-  color: '#3b82f6',
+  color: 'currentColor',
   speed: 1,
 })
 
@@ -28,7 +28,8 @@ const duration = computed(() => {
     class="vslk-pulse-orbit"
     :style="{
       width: boxSize,
-      height: boxSize
+      height: boxSize,
+      color: props.color,
     }"
   >
     <span

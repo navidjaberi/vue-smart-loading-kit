@@ -10,7 +10,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 48,
-  color: "#41B780",
+  color: "currentColor",
   speed: 1,
 });
 
@@ -32,6 +32,7 @@ const duration = computed(() => {
 const orbitStyle = computed(() => ({
   width: ringSize.value,
   height: ringSize.value,
+  color: props.color,
   "--vslk-size": ringSize.value,
   "--vslk-dot-size": dotSize.value,
   "--vslk-radius": radius.value,
@@ -63,7 +64,8 @@ const orbitStyle = computed(() => ({
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid rgba(65, 183, 128, 0.2);
+  border: 2px solid transparent;
+  border-color: color-mix(in srgb, currentColor 20%, transparent);
   box-sizing: border-box;
 }
 

@@ -45,7 +45,7 @@ describe("Pulse Spinner (via Spinner wrapper, type='pulse')", () => {
 
   it("exposes the default color via the --vslk-pulse-color variable", () => {
     const wrapper = mountPulse();
-    expect(styleOf(wrapper)).toContain("--vslk-pulse-color: #3b82f6");
+    expect(styleOf(wrapper)).toContain("--vslk-pulse-color: currentColor");
   });
 
   it("exposes a custom color via the --vslk-pulse-color variable", () => {

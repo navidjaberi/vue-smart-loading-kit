@@ -14,7 +14,7 @@ describe('Spinner - Circle Variant', () => {
     const style = (circle.element as HTMLElement).style
         expect(style.width).toBe('40px')
     expect(style.borderWidth).toBe('4px')
-    expect(style.borderTopColor).toBe('rgb(59, 130, 246)') 
+    expect(style.borderTopColor.toLowerCase()).toBe('currentcolor')
     expect(style.animationDuration).toBe('1s')
   })
 

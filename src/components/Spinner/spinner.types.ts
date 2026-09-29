@@ -6,7 +6,8 @@ export type SpinnerVariantName =
   | "ring"
   | "orbit"
   | "pulse-dots"
-  | "orbit-dots";
+  | "orbit-dots"
+  | "arc";
 
 /** camelCase spellings accepted by the legacy `type` prop (v0.1.0). */
 export type SpinnerLegacyType = "pulseDots" | "orbitDots";
@@ -23,4 +24,9 @@ export interface SpinnerProps {
   speed?: number;
   thickness?: number;
   label?: string;
+  /** Faint full circle behind the moving part (circle, ring, arc).
+   *  `true` derives it from `color`; a string sets its color. */
+  track?: boolean | string;
+  /** 0–100: turns `arc` into a determinate progress indicator. */
+  value?: number;
 }

@@ -228,6 +228,7 @@ The outline applies to every shape of composite variants (`card`, `table`, `list
 | `orbit-dots` | Orbiting dots loader |
 | `ring`       | Ring loader          |
 | `bars`       | Animated bars loader |
+| `arc`        | Material-style arc; also a progress indicator via `value` |
 
 ### Example
 
@@ -235,9 +236,28 @@ The outline applies to every shape of composite variants (`card`, `table`, `list
 <template>
   <Spinner variant="dots" />
   <Spinner variant="pulse" />
-  <Spinner variant="orbit" />
+  <Spinner variant="arc" />
 </template>
 ```
+
+Spinners use the surrounding text color by default (`currentColor`), so they fit buttons and dark mode without any configuration:
+
+```vue
+<button :disabled="saving">
+  <Spinner v-if="saving" variant="arc" size="1em" :thickness="2" />
+  Save
+</button>
+```
+
+### Progress
+
+Pass `value` (0–100) to `arc` to show determinate progress, for example during an upload:
+
+```vue
+<Spinner variant="arc" :value="uploadPercent" track label="Uploading file" />
+```
+
+With a `label`, it is announced to screen readers as a `progressbar` with the current percentage. Other variants ignore `value` and log a warning in development.
 
 ---
 
@@ -331,14 +351,16 @@ Spinner variants provide different loading animations while keeping the componen
 <Spinner variant="ring" :size="48" color="#7c3aed" :speed="1.5" :thickness="3" label="Loading" />
 ```
 
-| Prop        | Type               | Default     |
-| ----------- | ------------------ | ----------- |
-| `variant`   | see table above    | `"circle"`  |
-| `size`      | `number \| string` | `40`        |
-| `color`     | `string`           | `"#3b82f6"` |
-| `speed`     | `number`           | `1`         |
-| `thickness` | `number`           | `4`         |
-| `label`     | `string`           | —           |
+| Prop        | Type                | Default          | Notes                                                        |
+| ----------- | ------------------- | ---------------- | ------------------------------------------------------------ |
+| `variant`   | see table above     | `"circle"`       |                                                              |
+| `size`      | `number \| string`  | `40`             | Every variant renders a `size` x `size` box.                 |
+| `color`     | `string`            | `"currentColor"` | Inherits the text color unless set.                          |
+| `speed`     | `number`            | `1`              |                                                              |
+| `thickness` | `number`            | `4`              | Stroke width in px for `circle`, `ring` and `arc`.           |
+| `track`     | `boolean \| string` | variant default  | Faint circle behind `circle` (on by default), `ring`, `arc`. A string sets its color. |
+| `value`     | `number`            | —                | 0–100, `arc` only: turns it into a progress indicator.       |
+| `label`     | `string`            | —                | Makes the spinner announce itself to screen readers.         |
 
 `size` accepts a number (px) or any CSS length (`"3rem"`, `"50%"`). When the user has `prefers-reduced-motion: reduce` enabled, spinners run at half speed instead of stopping, so the page never looks frozen.
 

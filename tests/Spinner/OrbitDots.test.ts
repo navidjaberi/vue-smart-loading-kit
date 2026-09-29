@@ -75,11 +75,11 @@ describe("OrbitDots Spinner (via Spinner wrapper, type='orbitDots')", () => {
     ).toContain("animation-duration: 0.5s");
   });
 
-  it("applies the wrapper's default color (#3b82f6) to every dot", () => {
+  it("applies the wrapper's default color (currentColor) to every dot", () => {
     const wrapper = mount(Spinner, { props: { type: "orbitDots" } });
 
     wrapper.findAll(".dot-core").forEach((dot) => {
-      expect(dot.element).toHaveStyle({ backgroundColor: "#3b82f6" });
+      expect((dot.element as HTMLElement).style.backgroundColor.toLowerCase()).toBe("currentcolor");
     });
   });
 

@@ -10,13 +10,14 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 40,
-  color: "#3b82f6",
+  color: "currentColor",
   speed: 1,
 });
 
 const containerHeight = computed(() => toCssSize(props.size));
 const barWidth = computed(() => scaleSize(props.size, "/", 8));
-const gapSize = computed(() => scaleSize(props.size, "/", 10));
+// five bars of size/8 plus four gaps of size*3/32 fill exactly one `size`
+const gapSize = computed(() => scaleSize(props.size, "*", 3 / 32));
 
 const duration = computed(() => {
   const safeSpeed =
@@ -38,8 +39,10 @@ const getAnimationDelay = (index: number) => {
   <div
     class="v-spinner-bars"
     :style="{
+      width: containerHeight,
       height: containerHeight,
       gap: gapSize,
+      color: props.color,
     }"
   >
     <span

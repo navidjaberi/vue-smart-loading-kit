@@ -207,6 +207,14 @@ const SPINNERS: Record<SpinnerVariantName, VariantDef> = {
   orbit: { name: "Orbit", blurb: "One dot orbiting the center." },
   "pulse-dots": { name: "PulseDots", blurb: "Three dots pulsing in sequence." },
   "orbit-dots": { name: "OrbitDots", blurb: "Three dots orbiting at equal spacing." },
+  arc: {
+    name: "Arc",
+    blurb: "Material-style arc that grows and shrinks while it turns. Set a value to show progress.",
+    notes: [
+      "Turn on determinate and drag the value to use it as a progress indicator (0–100).",
+      "With a label, a determinate arc is announced to screen readers as a progressbar.",
+    ],
+  },
 };
 
 /* ------------------------------------------------------------------ */
@@ -267,6 +275,11 @@ const s = reactive({
   size: 48,
   speed: 1,
   thickness: 4,
+  /** "default" leaves the variant's own default (on for circle, off otherwise) */
+  track: "default" as "default" | "on" | "off" | "custom",
+  trackColor: "#e5e7eb",
+  determinate: false,
+  value: 65,
 });
 
 /** Per-variant live values, keyed "family:variant" so switching keeps state */
@@ -396,7 +409,15 @@ const bound = computed(() => {
   return p;
 });
 
-const showThickness = computed(() => ["circle", "ring"].includes(current.value));
+const showThickness = computed(() => ["circle", "ring", "arc"].includes(current.value));
+const showTrack = showThickness;
+const showValue = computed(() => current.value === "arc");
+
+/** `track` prop value for the current controls (undefined = variant default). */
+const trackValue = computed(() => {
+  if (!showTrack.value) return undefined;
+  return { default: undefined, on: true, off: false, custom: s.trackColor }[s.track];
+});
 
 const spinnerBound = computed(() => {
   const b: any = {
@@ -406,6 +427,8 @@ const spinnerBound = computed(() => {
     speed: s.speed,
   };
   if (showThickness.value) b.thickness = s.thickness;
+  if (trackValue.value !== undefined) b.track = trackValue.value;
+  if (showValue.value && s.determinate) b.value = s.value;
   return b;
 });
 
@@ -437,6 +460,10 @@ const snippet = computed(() => {
       `  :speed="${b.speed}"`,
     ];
     if (showThickness.value) lines.push(`  :thickness="${b.thickness}"`);
+    if (b.track === true) lines.push(`  track`);
+    else if (b.track === false) lines.push(`  :track="false"`);
+    else if (typeof b.track === "string") lines.push(`  track="${b.track}"`);
+    if (b.value !== undefined) lines.push(`  :value="${b.value}"`);
     lines.push("/>");
     return lines.join("\n");
   }
@@ -711,6 +738,27 @@ function pick(fam: "skeleton" | "spinner", key: string) {
               <label class="ctl" v-if="showThickness">
                 <span>thickness · {{ s.thickness }}</span>
                 <input v-model.number="s.thickness" type="range" min="1" max="16" />
+              </label>
+              <label class="ctl" v-if="showTrack">
+                <span>track</span>
+                <select v-model="s.track">
+                  <option value="default">default</option>
+                  <option value="on">on</option>
+                  <option value="off">off</option>
+                  <option value="custom">custom color</option>
+                </select>
+              </label>
+              <label class="ctl" v-if="showTrack && s.track === 'custom'">
+                <span>track color</span>
+                <input v-model="s.trackColor" type="color" />
+              </label>
+              <label class="ctl" v-if="showValue">
+                <span>determinate</span>
+                <input v-model="s.determinate" type="checkbox" />
+              </label>
+              <label class="ctl" v-if="showValue && s.determinate">
+                <span>value · {{ s.value }}%</span>
+                <input v-model.number="s.value" type="range" min="0" max="100" />
               </label>
             </div>
           </div>

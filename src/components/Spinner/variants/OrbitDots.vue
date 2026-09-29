@@ -10,7 +10,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   size: 40,
-  color: "#3b82f6",
+  color: "currentColor",
   speed: 1,
 });
 
@@ -39,6 +39,7 @@ const inwardOffset = computed(() =>
     :style="{
       width: boxSize,
       height: boxSize,
+      color: props.color,
       animationDuration: duration + 's',
     }"
   >

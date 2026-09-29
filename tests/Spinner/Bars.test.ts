@@ -15,7 +15,7 @@ describe("Spinner - Bars Variant", () => {
     expect(spans).toHaveLength(5);
   });
 
-  it("applies default props (size=40, color=#3b82f6, speed=1)", () => {
+  it("applies default props (size=40, color=currentColor, speed=1)", () => {
     const wrapper = mount(Spinner, {
       props: { type: "bars" },
     });
@@ -23,10 +23,10 @@ describe("Spinner - Bars Variant", () => {
     const container = wrapper.find(".v-spinner-bars");
     const spans = wrapper.findAll(".v-spinner-bars span");
     expect((container.element as HTMLElement).style.height).toBe("40px");
-    expect((container.element as HTMLElement).style.gap).toBe("4px");
+    expect((container.element as HTMLElement).style.gap).toBe("3.75px"); // 3/32 of size
     const firstSpanStyle = (spans[0].element as HTMLElement).style;
     expect(firstSpanStyle.width).toBe("5px");
-    expect(firstSpanStyle.backgroundColor).toBe("rgb(59, 130, 246)");
+    expect(firstSpanStyle.backgroundColor.toLowerCase()).toBe("currentcolor");
     expect(firstSpanStyle.animationDuration).toBe("1s"); // 1 / 1
   });
 
@@ -38,7 +38,7 @@ describe("Spinner - Bars Variant", () => {
     const container = wrapper.find(".v-spinner-bars");
     const firstSpan = wrapper.find(".v-spinner-bars span");
     expect((container.element as HTMLElement).style.height).toBe("80px");
-    expect((container.element as HTMLElement).style.gap).toBe("8px");
+    expect((container.element as HTMLElement).style.gap).toBe("7.5px");
     expect((firstSpan.element as HTMLElement).style.width).toBe("10px");
   });
 
@@ -51,7 +51,7 @@ describe("Spinner - Bars Variant", () => {
     const firstSpan = wrapper.find(".v-spinner-bars span");
 
     expect((container.element as HTMLElement).style.height).toBe("60px");
-    expect((container.element as HTMLElement).style.gap).toBe("6px");
+    expect((container.element as HTMLElement).style.gap).toBe("5.625px");
     expect((firstSpan.element as HTMLElement).style.width).toBe("7.5px");
   });
 

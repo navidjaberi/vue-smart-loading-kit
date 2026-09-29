@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, warn, watch } from "vue";
 import Circle from "./variants/Circle.vue";
 import Dots from "./variants/Dots.vue";
 import Pulse from "./variants/Pulse.vue";
@@ -8,15 +8,20 @@ import Ring from "./variants/Ring.vue";
 import Orbit from "./variants/Orbit.vue";
 import PulseDots from "./variants/PulseDots.vue";
 import OrbitDots from "./variants/OrbitDots.vue";
-import type { Component } from "vue";
+import Arc from "./variants/Arc.vue";
+import type { Component, HTMLAttributes } from "vue";
 import type { SpinnerProps, SpinnerVariantName } from "./spinner.types";
 import { usePrefersReducedMotion } from "../../utils/usePrefersReducedMotion";
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
   size: 40,
-  color: "#3b82f6",
+  color: "currentColor",
   speed: 1,
   thickness: 4,
+  /* An explicit undefined default opts out of Vue's Boolean casting (an
+     absent boolean prop becomes `false`), so each variant's own track
+     default applies unless the user sets `track`. */
+  track: undefined,
 });
 
 /* A spinner that stops entirely reads as a frozen page, so reduced
@@ -36,32 +41,78 @@ const variants: Record<SpinnerVariantName, Component> = {
   orbit: Orbit,
   "pulse-dots": PulseDots,
   "orbit-dots": OrbitDots,
+  arc: Arc,
 };
 
 /** `variant` wins over the deprecated `type`; camelCase names are
  *  normalized to kebab-case so both v0.1.0 spellings keep working. */
-const component = computed(() => {
+const variantName = computed(() => {
   const raw = props.variant ?? props.type ?? "circle";
-  const name = raw.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
-  return variants[name as SpinnerVariantName] ?? Circle;
+  return raw.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+});
+const component = computed(() => variants[variantName.value as SpinnerVariantName] ?? Circle);
+
+/** Prop names the current variant declares. */
+const accepted = computed(() => Object.keys((component.value as { props?: object }).props ?? {}));
+
+/* Pass each variant only the props it declares: anything else (e.g.
+   `thickness` on dots) would render as a stray HTML attribute. Undefined
+   values are dropped so the variant's own defaults apply. */
+const variantProps = computed(() => {
+  const all: Record<string, unknown> = {
+    size: props.size,
+    color: props.color,
+    speed: effectiveSpeed.value,
+    thickness: props.thickness,
+    track: props.track,
+    value: props.value,
+  };
+  return Object.fromEntries(
+    Object.entries(all).filter(([k, v]) => v !== undefined && accepted.value.includes(k))
+  );
+});
+
+const progress = computed(() =>
+  accepted.value.includes("value") && typeof props.value === "number" && Number.isFinite(props.value)
+    ? Math.min(100, Math.max(0, props.value))
+    : null
+);
+
+watch(
+  () => props.value != null && !accepted.value.includes("value"),
+  (unsupported) => {
+    if (unsupported)
+      warn(
+        `[vue-smart-loading-kit] Spinner \`value\` is ignored by variant "${variantName.value}"; ` +
+          `only "arc" can show progress.`
+      );
+  },
+  { immediate: true }
+);
+
+/* Decorative by default. With a label it is announced: as a live status
+   while indeterminate, or as a progressbar with its percentage. */
+const a11y = computed<HTMLAttributes>(() => {
+  if (!props.label) return { "aria-hidden": true };
+  if (progress.value !== null)
+    return {
+      role: "progressbar",
+      "aria-valuemin": 0,
+      "aria-valuemax": 100,
+      "aria-valuenow": Math.round(progress.value),
+      "aria-label": props.label,
+    };
+  return { role: "status", "aria-live": "polite", "aria-busy": true };
 });
 </script>
 
 <template>
   <span
     class="vslk-spinner-wrapper"
-    v-bind="props.label
-      ? { role: 'status', 'aria-live': 'polite', 'aria-busy': 'true' }
-      : { 'aria-hidden': 'true' }"
+    v-bind="a11y"
   >
-    <component
-      :is="component"
-      :size="props.size"
-      :color="props.color"
-      :speed="effectiveSpeed"
-      :thickness="props.thickness"
-    />
-    <span v-if="props.label" class="vslk-sr-only">{{ props.label }}</span>
+    <component :is="component" v-bind="variantProps" />
+    <span v-if="props.label && progress === null" class="vslk-sr-only">{{ props.label }}</span>
   </span>
 </template>
 
