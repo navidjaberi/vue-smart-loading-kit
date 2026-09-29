@@ -6,6 +6,7 @@ export type {
   SkeletonBaseProps,
   SkeletonVariantName,
   SkeletonAnimationName,
+  SkeletonOutline,
 } from './components/Skeleton/types'
 export type {
   SpinnerProps,

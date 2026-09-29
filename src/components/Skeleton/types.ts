@@ -13,6 +13,15 @@ export type SkeletonVariantName =
   | "grid"
   | "image"
 export type SkeletonAnimationName = "none" | "shimmer" | "pulse" | "wave";
+/** Object form of `outlined`. Omitted fields fall back to 1px solid. */
+export type SkeletonOutline = {
+  enabled?: boolean;
+  /** Border thickness; numbers are px, strings are any CSS length. */
+  width?: number | string;
+  /** Any CSS border-style; the common ones autocomplete. */
+  style?: "solid" | "dashed" | "dotted" | "double" | (string & {});
+};
+
 export type SkeletonBaseProps = {
   size?: number | string;
     width?: number | string;
@@ -26,8 +35,6 @@ export type SkeletonBaseProps = {
   angle?: number | string;
   avatarSize?: number | string;
   lines?: number;
-  outlined?:
-    | boolean
-    | { enabled?: boolean; width?: string | number; style?: string };
+  outlined?: boolean | SkeletonOutline;
   options?: Record<string, any>;
 };

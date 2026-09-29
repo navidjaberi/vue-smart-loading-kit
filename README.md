@@ -193,6 +193,23 @@ Disable animation:
 />
 ```
 
+Pass an object to control the border's thickness and style:
+
+```vue
+<Skeleton
+  variant="card"
+  :outlined="{ width: 2, style: 'dashed' }"
+/>
+```
+
+| Field     | Type               | Default   | Notes                                              |
+| --------- | ------------------ | --------- | -------------------------------------------------- |
+| `width`   | `number \| string` | `1`       | Numbers are px; strings accept any CSS length.     |
+| `style`   | `string`           | `"solid"` | Any CSS `border-style` (`dashed`, `dotted`, ...).  |
+| `enabled` | `boolean`          | `true`    | Set `false` to turn the outline off from a config. |
+
+The outline applies to every shape of composite variants (`card`, `table`, `list`, ...). The border is drawn inside each shape, so a width close to a shape's height — such as the 10px text lines in `profile` — fills the shape completely.
+
 ---
 
 # ⏳ Spinner
