@@ -5,6 +5,7 @@ import { skeletonVariants } from "./variants";
 import type { SkeletonBaseProps, SkeletonVariantName } from "./types";
 import { generateAutoHighlight } from "./utils/color";
 import { shimmerPath } from "./utils/shimmer";
+import { useLoadingConfig } from "../../config";
 const props = withDefaults(
   defineProps<
     SkeletonBaseProps & {
@@ -19,11 +20,20 @@ const props = withDefaults(
   >(),
   {
     variant: "block",
-    animation: "shimmer",
-    speed: 1,
-    angle: 90,
+    // explicit undefined opts out of Vue's Boolean casting, so an unset
+    // `outlined` can fall through to the global config
+    outlined: undefined,
   }
 );
+
+/* Appearance props resolve as: explicit prop > global config > built-in
+   default. They carry no withDefaults, so "not set" stays detectable. */
+const config = useLoadingConfig();
+const conf = () => config.skeleton ?? {};
+const animation = computed(() => props.animation ?? conf().animation ?? "shimmer");
+const speed = computed(() => props.speed ?? conf().speed ?? 1);
+const angle = computed(() => props.angle ?? conf().angle ?? 90);
+const outlined = computed(() => props.outlined ?? conf().outlined);
 
 /* An unknown variant (a typo, or a name from a newer version) would
    otherwise render an empty, zero-height box with no hint why. Fall back
@@ -47,9 +57,10 @@ const variantProps = computed(() => {
   const { variant, label, ...rest } = props;
   return rest;
 });
-const resolvedBase = computed(() => props.color ?? "rgba(148, 163, 184, 0.22)");
+const resolvedBase = computed(() => props.color ?? conf().color ?? "rgba(148, 163, 184, 0.22)");
 const resolvedHighlight = computed(() => {
-  if (props.highlight) return props.highlight;
+  const highlight = props.highlight ?? conf().highlight;
+  if (highlight) return highlight;
 
   const auto = generateAutoHighlight(resolvedBase.value, {
     lightThreshold: 0.8,
@@ -61,11 +72,11 @@ const resolvedHighlight = computed(() => {
 });
 
 const normalizedAnimation = computed(() => {
-  return props.animation === "wave" ? "shimmer" : props.animation ?? "shimmer";
+  return animation.value === "wave" ? "shimmer" : animation.value;
 });
 
 const resolvedDuration = computed(() => {
-  const s = props.speed && props.speed > 0 ? props.speed : 1;
+  const s = speed.value > 0 ? speed.value : 1;
   const durations = {
     shimmer: 1500,
     pulse: 1500, // پالس کمی آرام‌تر حس بهتری می‌دهد
@@ -78,10 +89,10 @@ const resolvedDuration = computed(() => {
 
 /* Where the sheen's background-position slides from/to for this angle.
    See utils/shimmer.ts for why the endpoints are opposite corners. */
-const shimmer = computed(() => shimmerPath(props.angle));
+const shimmer = computed(() => shimmerPath(angle.value));
 
 const outlinedCfg = computed(() => {
-  const v = props.outlined;
+  const v = outlined.value;
   if (!v) return { enabled: false, width: "1px", style: "solid" };
   if (v === true) return { enabled: true, width: "1px", style: "solid" };
   return {
@@ -109,7 +120,7 @@ const outlinedCfg = computed(() => {
       '--vslk-sk-w': typeof props.width === 'number' ? `${props.width}px` : props.width,
       '--vslk-sk-h': typeof props.height === 'number' ? `${props.height}px` : props.height,
       '--vslk-sk-r': typeof props.radius === 'number' ? `${props.radius}px` : props.radius,
-      '--vslk-sk-shimmer-angle': typeof props.angle === 'number' ? `${props.angle}deg` : props.angle ?? '90deg',
+      '--vslk-sk-shimmer-angle': typeof angle === 'number' ? `${angle}deg` : angle,
       '--vslk-sk-shimmer-from': shimmer.from,
       '--vslk-sk-shimmer-to': shimmer.to,
     }"

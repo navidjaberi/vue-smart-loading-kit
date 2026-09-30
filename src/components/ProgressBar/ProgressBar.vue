@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { resolveTrack } from "../Spinner/track";
 import { clampProgress, progressA11y } from "../../utils/progress";
 import { usePrefersReducedMotion } from "../../utils/usePrefersReducedMotion";
+import { useLoadingConfig } from "../../config";
 
 const props = withDefaults(
   defineProps<{
@@ -18,23 +19,30 @@ const props = withDefaults(
     label?: string;
   }>(),
   {
-    color: "currentColor",
-    // unlike the arc, a bar with no visible rail is hard to read as progress
-    track: true,
-    thickness: 4,
-    speed: 1,
+    // explicit undefined opts out of Vue's Boolean casting, so an unset
+    // `track` can fall through to the global config
+    track: undefined,
   }
 );
 
+// explicit prop > global config > built-in default
+const config = useLoadingConfig();
+const conf = () => config.progressBar ?? {};
+const color = computed(() => props.color ?? conf().color ?? "currentColor");
+const thickness = computed(() => props.thickness ?? conf().thickness ?? 4);
+const speed = computed(() => props.speed ?? conf().speed ?? 1);
+// unlike the arc, a bar with no visible rail is hard to read as progress
+const track = computed(() => props.track ?? conf().track ?? true);
+
 const progress = computed(() => clampProgress(props.value));
-const trackInfo = computed(() => resolveTrack(props.track));
+const trackInfo = computed(() => resolveTrack(track.value));
 const a11y = computed(() => progressA11y(props.label, progress.value));
 
 // Same reduced-motion policy as Spinner: slow down rather than freeze.
 const prefersReducedMotion = usePrefersReducedMotion();
 const duration = computed(() => {
-  const speed = props.speed > 0 ? props.speed : 1;
-  return `${(1.5 / speed) * (prefersReducedMotion.value ? 2 : 1)}s`;
+  const s = speed.value > 0 ? speed.value : 1;
+  return `${(1.5 / s) * (prefersReducedMotion.value ? 2 : 1)}s`;
 });
 </script>
 
@@ -44,8 +52,8 @@ const duration = computed(() => {
     :class="{ 'vslk-progress--indeterminate': progress === null }"
     :data-vslk-track="trackInfo?.attr"
     :style="{
-      height: `${props.thickness}px`,
-      color: props.color,
+      height: `${thickness}px`,
+      color: color,
       '--vslk-progress-track': trackInfo?.color ?? 'transparent',
       '--vslk-progress-duration': duration,
     }"

@@ -22,6 +22,15 @@ All notable changes to this project are documented here. The format follows
   jump.
 - **`useDelayedLoading`**: the timing logic behind `SmartLoader`, exported for
   loaders you render yourself.
+- **`PageProgress`**: a bar pinned to the top of the page for route changes
+  and requests. It follows a vue-router passed to the plugin (vue-router is
+  not a dependency) and any task started with `usePageProgress()`. It counts
+  parallel tasks, skips tasks shorter than `delay`, eases toward 90%, and
+  fills and fades out on completion.
+- **Global config**: `app.use(VueSmartLoadingKit, { skeleton, spinner,
+  progressBar, smartLoader, pageProgress })` sets app-wide defaults (an
+  explicit prop still wins). `provideLoadingConfig()` overrides them for a
+  subtree, or configures the kit without the plugin.
 - **`ProgressBar`**: a linear progress indicator, determinate (`value`) or
   indeterminate.
 - **Spinner `arc` variant**: a Material-style arc. With `value` (0–100) it

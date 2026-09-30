@@ -13,24 +13,31 @@ import type { Component } from "vue";
 import type { SpinnerProps, SpinnerVariantName } from "./spinner.types";
 import { usePrefersReducedMotion } from "../../utils/usePrefersReducedMotion";
 import { clampProgress, progressA11y } from "../../utils/progress";
+import { useLoadingConfig } from "../../config";
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
-  size: 40,
-  color: "currentColor",
-  speed: 1,
-  thickness: 4,
   /* An explicit undefined default opts out of Vue's Boolean casting (an
-     absent boolean prop becomes `false`), so each variant's own track
-     default applies unless the user sets `track`. */
+     absent boolean prop becomes `false`), so an unset `track` can fall
+     through to the global config and then to each variant's own default. */
   track: undefined,
 });
+
+/* explicit prop > global config > built-in default (no withDefaults on
+   these, so "not set" stays detectable) */
+const config = useLoadingConfig();
+const conf = () => config.spinner ?? {};
+const size = computed(() => props.size ?? conf().size ?? 40);
+const color = computed(() => props.color ?? conf().color ?? "currentColor");
+const speed = computed(() => props.speed ?? conf().speed ?? 1);
+const thickness = computed(() => props.thickness ?? conf().thickness ?? 4);
+const track = computed(() => props.track ?? conf().track);
 
 /* A spinner that stops entirely reads as a frozen page, so reduced
    motion slows it down instead of disabling it (unlike Skeleton). */
 const REDUCED_MOTION_SPEED_FACTOR = 0.5;
 const prefersReducedMotion = usePrefersReducedMotion();
 const effectiveSpeed = computed(() =>
-  prefersReducedMotion.value ? props.speed * REDUCED_MOTION_SPEED_FACTOR : props.speed
+  prefersReducedMotion.value ? speed.value * REDUCED_MOTION_SPEED_FACTOR : speed.value
 );
 
 const variants: Record<SpinnerVariantName, Component> = {
@@ -48,7 +55,8 @@ const variants: Record<SpinnerVariantName, Component> = {
 /** `variant` wins over the deprecated `type`; camelCase names are
  *  normalized to kebab-case so both v0.1.0 spellings keep working. */
 const variantName = computed(() => {
-  const raw = props.variant ?? props.type ?? "circle";
+  // the deprecated `type` is still an explicit choice, so it beats config
+  const raw = props.variant ?? props.type ?? conf().variant ?? "circle";
   return raw.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 });
 const component = computed(() => variants[variantName.value as SpinnerVariantName] ?? Circle);
@@ -61,11 +69,11 @@ const accepted = computed(() => Object.keys((component.value as { props?: object
    values are dropped so the variant's own defaults apply. */
 const variantProps = computed(() => {
   const all: Record<string, unknown> = {
-    size: props.size,
-    color: props.color,
+    size: size.value,
+    color: color.value,
     speed: effectiveSpeed.value,
-    thickness: props.thickness,
-    track: props.track,
+    thickness: thickness.value,
+    track: track.value,
     value: props.value,
   };
   return Object.fromEntries(

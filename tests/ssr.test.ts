@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSSRApp, h, type Component } from "vue";
 import { renderToString } from "vue/server-renderer";
-import { Skeleton, Spinner, ProgressBar, SmartLoader } from "../src/index";
+import VueSmartLoadingKit, { Skeleton, Spinner, ProgressBar, SmartLoader, PageProgress, usePageProgress } from "../src/index";
 import { skeletonVariants } from "../src/components/Skeleton/variants";
 
 /* Server-side rendering (Nuxt, vite-ssr, ...): no window, no document,
@@ -49,6 +49,22 @@ describe("SSR", () => {
 
     // the loader is delayed, so the server sends the content
     expect(html).toContain("Content");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("renders PageProgress with a router and a running task, scheduling no timers", async () => {
+    const noop = () => () => {};
+    const app = createSSRApp({
+      setup() {
+        usePageProgress().start(); // e.g. a fetch started during SSR
+        return () => h(PageProgress, { delay: 0 });
+      },
+    });
+    app.use(VueSmartLoadingKit, { router: { beforeEach: noop, afterEach: noop, onError: noop } });
+
+    const html = await renderToString(app);
+
+    expect(html).not.toContain("vslk-page-progress"); // the bar is client-only
     expect(vi.getTimerCount()).toBe(0);
   });
 });

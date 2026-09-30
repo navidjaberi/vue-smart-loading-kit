@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
-import { Skeleton, Spinner } from "vue-smart-loading-kit";
+import { PageProgress, Skeleton, Spinner } from "vue-smart-loading-kit";
 import type { SkeletonVariantName, SpinnerVariantName } from "vue-smart-loading-kit";
 import SmartLoaderDemo from "./SmartLoaderDemo.vue";
 import ProgressBarDemo from "./ProgressBarDemo.vue";
+import PageProgressDemo from "./PageProgressDemo.vue";
 
 /* ------------------------------------------------------------------ */
 /* Catalog                                                             */
@@ -516,8 +517,9 @@ async function copySnippet() {
 const compare = ref(false);
 const smartDemo = ref(false);
 const progressDemo = ref(false);
+const pageDemo = ref(false);
 
-watch([family, current, compare, smartDemo, progressDemo], revealActiveNav);
+watch([family, current, compare, smartDemo, progressDemo, pageDemo], revealActiveNav);
 onMounted(revealActiveNav);
 
 function pick(fam: "skeleton" | "spinner", key: string) {
@@ -526,17 +528,20 @@ function pick(fam: "skeleton" | "spinner", key: string) {
   compare.value = false;
   smartDemo.value = false;
   progressDemo.value = false;
+  pageDemo.value = false;
 }
 
-function openView(view: "compare" | "smart" | "progress") {
+function openView(view: "compare" | "smart" | "progress" | "page") {
   compare.value = view === "compare";
   smartDemo.value = view === "smart";
   progressDemo.value = view === "progress";
+  pageDemo.value = view === "page";
 }
 </script>
 
 <template>
   <div class="app" :class="{ 'app--dark': dark }">
+    <PageProgress label="Loading" />
     <!-- ===================== Sidebar ===================== -->
     <aside class="side">
       <div class="brand">
@@ -554,7 +559,7 @@ function openView(view: "compare" | "smart" | "progress") {
           v-for="(v, k) in SKELETONS"
           :key="'sk-' + k"
           class="nav"
-          :class="{ 'nav--on': family === 'skeleton' && current === k && !compare && !smartDemo && !progressDemo }"
+          :class="{ 'nav--on': family === 'skeleton' && current === k && !compare && !smartDemo && !progressDemo && !pageDemo }"
           @click="pick('skeleton', k)"
         >
           {{ v.name }}
@@ -567,7 +572,7 @@ function openView(view: "compare" | "smart" | "progress") {
           v-for="(v, k) in SPINNERS"
           :key="'sp-' + k"
           class="nav"
-          :class="{ 'nav--on': family === 'spinner' && current === k && !compare && !smartDemo && !progressDemo }"
+          :class="{ 'nav--on': family === 'spinner' && current === k && !compare && !smartDemo && !progressDemo && !pageDemo }"
           @click="pick('spinner', k)"
         >
           {{ v.name }}
@@ -585,6 +590,9 @@ function openView(view: "compare" | "smart" | "progress") {
         <button class="nav" :class="{ 'nav--on': progressDemo }" @click="openView('progress')">
           Progress bar
         </button>
+        <button class="nav" :class="{ 'nav--on': pageDemo }" @click="openView('page')">
+          Page progress
+        </button>
       </div>
     </aside>
 
@@ -593,6 +601,7 @@ function openView(view: "compare" | "smart" | "progress") {
       <!-- Compare view -->
       <SmartLoaderDemo v-if="smartDemo" />
       <ProgressBarDemo v-else-if="progressDemo" />
+      <PageProgressDemo v-else-if="pageDemo" />
 
       <template v-else-if="compare">
         <header class="head">

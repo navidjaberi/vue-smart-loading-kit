@@ -9,6 +9,7 @@ import {
   DEFAULT_MIN_DURATION,
   useDelayedLoading,
 } from "../utils/useDelayedLoading";
+import { useLoadingConfig } from "../config";
 
 const props = withDefaults(
   defineProps<{
@@ -33,12 +34,17 @@ const props = withDefaults(
     preserveHeight?: boolean;
   }>(),
   {
-    mode: "replace",
-    delay: DEFAULT_DELAY,
-    minDuration: DEFAULT_MIN_DURATION,
-    preserveHeight: true,
+    // explicit undefined opts out of Vue's Boolean casting, so an unset
+    // `preserveHeight` can fall through to the global config
+    preserveHeight: undefined,
   }
 );
+
+// explicit prop > global config > built-in default
+const config = useLoadingConfig();
+const conf = () => config.smartLoader ?? {};
+const mode = computed(() => props.mode ?? conf().mode ?? "replace");
+const preserveHeight = computed(() => props.preserveHeight ?? conf().preserveHeight ?? true);
 
 const emit = defineEmits<{
   /** The default error UI's "Try again" button (or the slot's `retry`). */
@@ -49,8 +55,8 @@ const emit = defineEmits<{
    aria-busy (in the template) follows the real `loading` state, so
    assistive tech knows the region is updating while the loader waits. */
 const showLoader = useDelayedLoading(() => props.loading, {
-  delay: () => props.delay,
-  minDuration: () => props.minDuration,
+  delay: () => props.delay ?? conf().delay ?? DEFAULT_DELAY,
+  minDuration: () => props.minDuration ?? conf().minDuration ?? DEFAULT_MIN_DURATION,
 });
 
 /* What is on screen: a visible loader wins, then an error, then content.
@@ -75,7 +81,7 @@ watch(
       reservedHeight.value = null;
       return;
     }
-    if (props.mode !== "replace" || !props.preserveHeight || !root.value) return;
+    if (mode.value !== "replace" || !preserveHeight.value || !root.value) return;
     const height = root.value.getBoundingClientRect().height;
     reservedHeight.value = height > 0 ? height : null;
   },
@@ -87,12 +93,14 @@ const skeletonProps = computed(() => ({
   lines: 3,
   width: "100%",
   height: 12,
+  ...conf().skeleton,
   ...props.skeleton,
   label: props.label,
 }));
 
 const spinnerProps = computed(() => ({
   variant: "arc" as const,
+  ...conf().spinner,
   ...props.spinner,
   label: props.label,
 }));
@@ -102,11 +110,11 @@ const spinnerProps = computed(() => ({
   <div
     ref="root"
     class="vslk-smart-loader"
-    :class="`vslk-smart-loader--${props.mode}`"
+    :class="`vslk-smart-loader--${mode}`"
     :style="reservedHeight ? { minHeight: `${reservedHeight}px` } : undefined"
     :aria-busy="props.loading || undefined"
   >
-    <template v-if="props.mode === 'replace'">
+    <template v-if="mode === 'replace'">
       <slot v-if="view === 'loader'" name="loader">
         <Skeleton v-bind="skeletonProps" />
       </slot>

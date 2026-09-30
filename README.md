@@ -19,6 +19,8 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 * Multiple Spinner variants, including a determinate progress arc
 * `ProgressBar`: a linear progress indicator, determinate or indeterminate
 * `SmartLoader`: no flash for fast loads, no blink for slow ones
+* `PageProgress`: a top-of-page bar for route changes and requests, replacing NProgress
+* Global config: set app-wide defaults once
 * Customizable size, radius, colors, animation, and more
 * Responsive by default
 * TypeScript support
@@ -409,13 +411,89 @@ const showLoader = useDelayedLoading(loading, { delay: 200, minDuration: 500 })
 
 ---
 
+# 🧭 PageProgress
+
+A thin bar pinned to the top of the page, like the ones on GitHub or YouTube. Place it once, then let it follow your router, your own tasks, or both:
+
+```ts
+// main.ts
+app.use(VueSmartLoadingKit, { router }) // follows every navigation
+```
+
+```vue
+<!-- App.vue -->
+<PageProgress />
+<RouterView />
+```
+
+```ts
+// anywhere, for your own tasks (fetches, uploads, ...)
+const progress = usePageProgress()
+progress.start()
+await fetchData()
+progress.done()
+```
+
+* Tasks shorter than `delay` (default 200ms) never show the bar, so fast or cached navigations don't flash.
+* The real duration is unknown, so the bar eases toward 90%. `done()` fills it to 100%, and then it fades out.
+* **Parallel tasks are counted:** the bar stays until the last started task is done.
+* A navigation that is redirected counts once and only ends its own slot, so it never ends a task you started.
+* vue-router is not a dependency. Only `beforeEach`, `afterEach` and `onError` are used.
+* Safe for SSR: nothing runs on the server.
+
+| Prop        | Type                 | Default          | Notes                                            |
+| ----------- | -------------------- | ---------------- | ------------------------------------------------ |
+| `color`     | `string`             | `"currentColor"` |                                                  |
+| `thickness` | `number`             | `3`              | Bar height in px.                                |
+| `delay`     | `number`             | `200`            | ms a task must last before the bar appears.      |
+| `label`     | `string`             | —                | Announced as a `progressbar` while visible.      |
+| `router`    | router               | —                | Alternative to passing `router` to the plugin.   |
+
+`usePageProgress()` needs the plugin (`app.use(VueSmartLoadingKit)`). Each app gets its own progress, so SSR requests never share state.
+
+---
+
+# ⚙️ Global config
+
+Set defaults for the whole app once. An explicit prop always wins, then the config, then the built-in default:
+
+```ts
+app.use(VueSmartLoadingKit, {
+  skeleton: { color: '#7c3aed', animation: 'pulse' },
+  spinner: { variant: 'arc', thickness: 3 },
+  progressBar: { thickness: 3 },
+  smartLoader: { delay: 300, minDuration: 600, skeleton: { variant: 'list' } },
+  pageProgress: { color: '#7c3aed' },
+})
+```
+
+| Section        | Keys                                                                  |
+| -------------- | --------------------------------------------------------------------- |
+| `skeleton`     | `color`, `highlight`, `animation`, `speed`, `angle`, `outlined`       |
+| `spinner`      | `variant`, `color`, `size`, `speed`, `thickness`, `track`             |
+| `progressBar`  | `color`, `thickness`, `track`, `speed`                                |
+| `smartLoader`  | `mode`, `delay`, `minDuration`, `preserveHeight`, `skeleton`, `spinner` |
+| `pageProgress` | `color`, `thickness`, `delay`, `label`                                |
+
+Only appearance and behavior are configurable, not per-instance layout such as `width` or `lines`.
+
+To override the config for part of the page, such as a dark section, or to configure the kit without the plugin (local imports), call `provideLoadingConfig` in a component's `setup`. It merges with the config above it:
+
+```ts
+import { provideLoadingConfig } from 'vue-smart-loading-kit'
+
+provideLoadingConfig({ skeleton: { color: 'rgba(255, 255, 255, 0.12)' } })
+```
+
+---
+
 # 🛠️ TypeScript
 
 The library ships with TypeScript declarations out of the box, so component props and public APIs are typed automatically when used in TypeScript projects.
 
 ```ts
-import { Skeleton, Spinner, ProgressBar, SmartLoader, useDelayedLoading } from 'vue-smart-loading-kit'
-import type { SkeletonVariantName, SpinnerProps } from 'vue-smart-loading-kit'
+import { Skeleton, Spinner, ProgressBar, SmartLoader, PageProgress, usePageProgress } from 'vue-smart-loading-kit'
+import type { LoadingKitConfig, SkeletonVariantName, SpinnerProps } from 'vue-smart-loading-kit'
 ```
 
 ---
