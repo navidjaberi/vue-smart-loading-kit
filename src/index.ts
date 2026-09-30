@@ -1,7 +1,10 @@
 import type { App } from 'vue'
 import Skeleton from './components/Skeleton/Skeleton.vue'
 import Spinner from './components/Spinner/Spinner.vue'
-export { Skeleton, Spinner }
+import SmartLoader from './components/SmartLoader.vue'
+export { Skeleton, Spinner, SmartLoader }
+export { useDelayedLoading } from './utils/useDelayedLoading'
+export type { DelayedLoadingOptions } from './utils/useDelayedLoading'
 export type {
   SkeletonBaseProps,
   SkeletonVariantName,
@@ -17,5 +20,6 @@ export default {
   install(app: App) {
     app.component('Skeleton', Skeleton)
     app.component('Spinner', Spinner)
+    app.component('SmartLoader', SmartLoader)
   }
 }

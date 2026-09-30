@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { Skeleton, Spinner } from "vue-smart-loading-kit";
 import type { SkeletonVariantName, SpinnerVariantName } from "vue-smart-loading-kit";
+import SmartLoaderDemo from "./SmartLoaderDemo.vue";
 
 /* ------------------------------------------------------------------ */
 /* Catalog                                                             */
@@ -512,14 +513,21 @@ async function copySnippet() {
 /* ------------------------------------------------------------------ */
 
 const compare = ref(false);
+const smartDemo = ref(false);
 
-watch([family, current, compare], revealActiveNav);
+watch([family, current, compare, smartDemo], revealActiveNav);
 onMounted(revealActiveNav);
 
 function pick(fam: "skeleton" | "spinner", key: string) {
   family.value = fam;
   current.value = key;
   compare.value = false;
+  smartDemo.value = false;
+}
+
+function openView(view: "compare" | "smart") {
+  compare.value = view === "compare";
+  smartDemo.value = view === "smart";
 }
 </script>
 
@@ -542,7 +550,7 @@ function pick(fam: "skeleton" | "spinner", key: string) {
           v-for="(v, k) in SKELETONS"
           :key="'sk-' + k"
           class="nav"
-          :class="{ 'nav--on': family === 'skeleton' && current === k && !compare }"
+          :class="{ 'nav--on': family === 'skeleton' && current === k && !compare && !smartDemo }"
           @click="pick('skeleton', k)"
         >
           {{ v.name }}
@@ -555,7 +563,7 @@ function pick(fam: "skeleton" | "spinner", key: string) {
           v-for="(v, k) in SPINNERS"
           :key="'sp-' + k"
           class="nav"
-          :class="{ 'nav--on': family === 'spinner' && current === k && !compare }"
+          :class="{ 'nav--on': family === 'spinner' && current === k && !compare && !smartDemo }"
           @click="pick('spinner', k)"
         >
           {{ v.name }}
@@ -564,8 +572,11 @@ function pick(fam: "skeleton" | "spinner", key: string) {
 
       <div class="group">
         <div class="group__title">Views</div>
-        <button class="nav" :class="{ 'nav--on': compare }" @click="compare = !compare">
+        <button class="nav" :class="{ 'nav--on': compare }" @click="openView('compare')">
           Compare all
+        </button>
+        <button class="nav" :class="{ 'nav--on': smartDemo }" @click="openView('smart')">
+          Smart loader
         </button>
       </div>
     </aside>
@@ -573,7 +584,9 @@ function pick(fam: "skeleton" | "spinner", key: string) {
     <!-- ===================== Main ===================== -->
     <main class="main">
       <!-- Compare view -->
-      <template v-if="compare">
+      <SmartLoaderDemo v-if="smartDemo" />
+
+      <template v-else-if="compare">
         <header class="head">
           <h1>All {{ family === 'skeleton' ? 'skeletons' : 'spinners' }}</h1>
           <p class="sub">

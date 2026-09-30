@@ -32,6 +32,9 @@ const progress = computed(() =>
 
 const speed = computed(() => (props.speed > 0 ? props.speed : 1));
 
+// The bar uses pathLength="100", so dash lengths are percentages of the
+// circle and `value` maps straight onto stroke-dasharray.
+
 /* The viewBox is 44 units wide. `thickness` is in px (like circle/ring),
    so convert it to viewBox units when the size is known in px; for other
    units (rem, %) fall back to 1 unit = 1px of a 44px box. The radius
@@ -45,8 +48,6 @@ const radius = computed(() => Math.max(1, VIEWBOX / 2 - strokeWidth.value / 2));
 </script>
 
 <template>
-  <!-- pathLength="100" makes dash lengths percentages of the circle,
-       so `value` maps straight onto stroke-dasharray. -->
   <svg
     class="vslk-spinner-arc"
     :class="{ 'vslk-spinner-arc--indeterminate': progress === null }"

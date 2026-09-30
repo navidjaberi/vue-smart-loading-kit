@@ -15,7 +15,8 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 * Built for **Vue 3**
 * Lightweight and easy to integrate
 * Multiple Skeleton variants
-* Multiple Spinner variants
+* Multiple Spinner variants, including a determinate progress arc
+* `SmartLoader`: no flash for fast loads, no blink for slow ones
 * Customizable size, radius, colors, animation, and more
 * Responsive by default
 * TypeScript support
@@ -261,6 +262,61 @@ With a `label`, it is announced to screen readers as a `progressbar` with the cu
 
 ---
 
+# 🧠 SmartLoader
+
+`SmartLoader` wraps content and decides **when** a loader is worth showing:
+
+* a load shorter than `delay` never shows a loader, so fast requests don't flash;
+* once shown, the loader stays for at least `minDuration`, so it never just blinks;
+* if loading restarts while the loader is still up, it simply stays.
+
+```vue
+<SmartLoader :loading="loading" :skeleton="{ variant: 'list' }">
+  <UserList :users="users" />
+</SmartLoader>
+```
+
+## Modes
+
+| Mode                  | While loading                                                                  | Good for                          |
+| --------------------- | ------------------------------------------------------------------------------ | --------------------------------- |
+| `replace` (default)   | Swaps the content for a skeleton                                               | First load, when there is no data |
+| `overlay`             | Keeps the content, dimmed and `inert`, and centers a spinner over it            | Refreshing data, submitting forms |
+
+```vue
+<SmartLoader :loading="saving" mode="overlay" :spinner="{ variant: 'arc' }">
+  <ProfileForm />
+</SmartLoader>
+```
+
+## Props
+
+| Prop          | Type                     | Default     | Notes                                                                 |
+| ------------- | ------------------------ | ----------- | --------------------------------------------------------------------- |
+| `loading`     | `boolean`                | required    |                                                                       |
+| `mode`        | `"replace" \| "overlay"` | `"replace"` |                                                                       |
+| `delay`       | `number`                 | `200`       | ms a load must last before the loader appears. `0` shows it at once.  |
+| `minDuration` | `number`                 | `500`       | ms the loader stays once shown.                                       |
+| `skeleton`    | Skeleton props           | 3 text lines | Default loader in `replace` mode.                                    |
+| `spinner`     | Spinner props            | `arc`       | Default loader in `overlay` mode.                                     |
+| `label`       | `string`                 | —           | Announced to screen readers while the loader is visible.             |
+
+Use the `#loader` slot to render your own loader instead. The wrapper gets `aria-busy="true"` as soon as `loading` starts, even before the loader appears.
+
+## `useDelayedLoading`
+
+The same timing logic is available as a composable, for loaders you render yourself:
+
+```ts
+import { useDelayedLoading } from 'vue-smart-loading-kit'
+
+const showLoader = useDelayedLoading(loading, { delay: 200, minDuration: 500 })
+```
+
+`loading` and both options may be refs or getters.
+
+---
+
 # 🎯 Usage Examples
 
 ### Loading a user profile
@@ -308,7 +364,8 @@ With a `label`, it is announced to screen readers as a `progressbar` with the cu
 The library ships with TypeScript declarations out of the box, so component props and public APIs are typed automatically when used in TypeScript projects.
 
 ```ts
-import { Skeleton, Spinner } from 'vue-smart-loading-kit'
+import { Skeleton, Spinner, SmartLoader, useDelayedLoading } from 'vue-smart-loading-kit'
+import type { SkeletonVariantName, SpinnerProps } from 'vue-smart-loading-kit'
 ```
 
 ---
