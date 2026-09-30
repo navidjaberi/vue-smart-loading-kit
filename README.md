@@ -295,7 +295,9 @@ Like the spinners, it runs at half speed under `prefers-reduced-motion`.
 
 * a load shorter than `delay` never shows a loader, so fast requests don't flash;
 * once shown, the loader stays for at least `minDuration`, so it never just blinks;
-* if loading restarts while the loader is still up, it simply stays.
+* if loading restarts while the loader is still up, it simply stays;
+* while the loader stands in for the content, it keeps the content's height, so the page below doesn't jump;
+* it has a built-in error state with a retry button.
 
 ```vue
 <SmartLoader :loading="loading" :skeleton="{ variant: 'list' }">
@@ -327,8 +329,29 @@ Like the spinners, it runs at half speed under `prefers-reduced-motion`.
 | `skeleton`    | Skeleton props           | 3 text lines | Default loader in `replace` mode.                                    |
 | `spinner`     | Spinner props            | `arc`       | Default loader in `overlay` mode.                                     |
 | `label`       | `string`                 | —           | Announced to screen readers while the loader is visible.             |
+| `error`       | `unknown`                | —           | Any truthy value (`true`, an `Error`, a message) shows the error state. |
+| `preserveHeight` | `boolean`             | `true`      | `replace` mode: keep the content's height while the loader is shown. |
 
 Use the `#loader` slot to render your own loader instead. The wrapper gets `aria-busy="true"` as soon as `loading` starts, even before the loader appears.
+
+## Errors
+
+```vue
+<SmartLoader :loading="loading" :error="error" @retry="loadUsers">
+  <UserList :users="users" />
+</SmartLoader>
+```
+
+When `error` is set (and no loader is showing), the content is replaced by a short message and a **Try again** button that emits `retry`. It is announced with `role="alert"`. During a retry the error stays on screen until the loader appears, so nothing flashes in between. In `overlay` mode the message sits over the dimmed content.
+
+The default text is English. Use the `#error` slot for your own UI or language. It receives the `error` and a `retry` function:
+
+```vue
+<template #error="{ error, retry }">
+  <p>Could not load users: {{ error.message }}</p>
+  <button @click="retry">Retry</button>
+</template>
+```
 
 ## `useDelayedLoading`
 

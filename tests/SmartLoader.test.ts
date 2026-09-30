@@ -129,3 +129,119 @@ describe("SmartLoader — exports", () => {
     expect(app.component("SmartLoader")).toBe(SmartLoader);
   });
 });
+
+describe("SmartLoader — error state", () => {
+  it("shows a default error with a retry button instead of the content", () => {
+    const wrapper = mountLoader({ loading: false, error: new Error("boom") });
+
+    const alert = wrapper.find('[role="alert"]');
+    expect(alert.exists()).toBe(true);
+    expect(alert.text()).toContain("Something went wrong");
+    expect(alert.find("button").text()).toBe("Try again");
+    expect(wrapper.find(".content").exists()).toBe(false);
+  });
+
+  it("emits retry from the default button", async () => {
+    const wrapper = mountLoader({ loading: false, error: true });
+
+    await wrapper.find('[role="alert"] button').trigger("click");
+
+    expect(wrapper.emitted("retry")).toHaveLength(1);
+  });
+
+  it("passes the error and a retry function to the #error slot", async () => {
+    const wrapper = mountLoader(
+      { loading: false, error: "Network down" },
+      {
+        ...content,
+        error: (({ error, retry }: { error: unknown; retry: () => void }) =>
+          h("button", { class: "my-retry", onClick: retry }, String(error))) as never,
+      }
+    );
+
+    expect(wrapper.find(".my-retry").text()).toBe("Network down");
+    await wrapper.find(".my-retry").trigger("click");
+    expect(wrapper.emitted("retry")).toHaveLength(1);
+  });
+
+  it("shows the content when error is falsy", () => {
+    for (const error of [null, undefined, false, ""]) {
+      expect(mountLoader({ loading: false, error }).find(".content").exists()).toBe(true);
+    }
+  });
+
+  it("keeps the error on screen while a retry is within its delay, then shows the loader", async () => {
+    const wrapper = mountLoader({ loading: false, error: true, delay: 200 });
+
+    await wrapper.setProps({ loading: true });
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    expect(wrapper.find(".content").exists()).toBe(false);
+
+    vi.advanceTimersByTime(200);
+    await nextTick();
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.find(".vslk-skeleton-container").exists()).toBe(true);
+  });
+
+  it("overlay mode shows the error over the inert content", () => {
+    const wrapper = mountLoader({ mode: "overlay", loading: false, error: true });
+
+    expect(wrapper.find(".content").exists()).toBe(true);
+    expect(wrapper.find(".vslk-smart-loader__content").attributes("inert")).toBeDefined();
+    expect(wrapper.find('.vslk-smart-loader__overlay [role="alert"]').exists()).toBe(true);
+  });
+});
+
+describe("SmartLoader — layout shift (replace mode)", () => {
+  /* jsdom has no layout: fake one where the real content is `height` px
+     tall and anything else (e.g. the skeleton) is 80px. That way a
+     measurement taken AFTER the swap (the skeleton's height) is wrong. */
+  const fakeHeight = (height: number) =>
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement
+    ) {
+      return { height: this.querySelector(".content") ? height : 80 } as DOMRect;
+    });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("reserves the content's height while the loader replaces it, then releases it", async () => {
+    fakeHeight(600);
+    const wrapper = mountLoader({ loading: false, delay: 0, minDuration: 0 });
+
+    await wrapper.setProps({ loading: true });
+    expect(wrapper.find(".vslk-skeleton-container").exists()).toBe(true);
+    expect((wrapper.element as HTMLElement).style.minHeight).toBe("600px");
+
+    await wrapper.setProps({ loading: false });
+    expect(wrapper.find(".content").exists()).toBe(true);
+    expect((wrapper.element as HTMLElement).style.minHeight).toBe("");
+  });
+
+  it("reserves nothing on the first load, when there was no content yet", () => {
+    fakeHeight(600);
+    const wrapper = mountLoader({ loading: true, delay: 0 });
+
+    expect((wrapper.element as HTMLElement).style.minHeight).toBe("");
+  });
+
+  it("can be turned off with preserveHeight=false", async () => {
+    fakeHeight(600);
+    const wrapper = mountLoader({ loading: false, delay: 0, preserveHeight: false });
+
+    await wrapper.setProps({ loading: true });
+
+    expect((wrapper.element as HTMLElement).style.minHeight).toBe("");
+  });
+
+  it("does not reserve height in overlay mode, where the content stays", async () => {
+    fakeHeight(600);
+    const wrapper = mountLoader({ mode: "overlay", loading: false, delay: 0 });
+
+    await wrapper.setProps({ loading: true });
+
+    expect((wrapper.element as HTMLElement).style.minHeight).toBe("");
+  });
+});

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import Skeleton from "./Skeleton/Skeleton.vue";
 import Spinner from "./Spinner/Spinner.vue";
 import type { SkeletonBaseProps, SkeletonVariantName } from "./Skeleton/types";
@@ -26,13 +26,24 @@ const props = withDefaults(
     spinner?: SpinnerProps;
     /** Announced to screen readers while the loader is visible. */
     label?: string;
+    /** Any truthy value (true, an Error, a message) shows the error state. */
+    error?: unknown;
+    /** replace mode: keep the content's height while the loader stands in
+     *  for it, so the rest of the page doesn't jump. */
+    preserveHeight?: boolean;
   }>(),
   {
     mode: "replace",
     delay: DEFAULT_DELAY,
     minDuration: DEFAULT_MIN_DURATION,
+    preserveHeight: true,
   }
 );
+
+const emit = defineEmits<{
+  /** The default error UI's "Try again" button (or the slot's `retry`). */
+  retry: [];
+}>();
 
 /* The loader appears only after `delay` and stays for `minDuration`, but
    aria-busy (in the template) follows the real `loading` state, so
@@ -41,6 +52,35 @@ const showLoader = useDelayedLoading(() => props.loading, {
   delay: () => props.delay,
   minDuration: () => props.minDuration,
 });
+
+/* What is on screen: a visible loader wins, then an error, then content.
+   So during a retry the error stays up until the loader actually appears,
+   rather than flashing stale or empty content in between. */
+const view = computed(() =>
+  showLoader.value ? "loader" : props.error ? "error" : "content"
+);
+
+const retry = () => emit("retry");
+
+/* Layout shift: measure what is on screen right before the loader
+   replaces it ("pre" runs before the DOM update, while the content is
+   still there) and keep that height until the loader goes away. On a
+   first load nothing was shown yet, so nothing is reserved. */
+const root = ref<HTMLElement>();
+const reservedHeight = ref<number | null>(null);
+watch(
+  showLoader,
+  (shown) => {
+    if (!shown) {
+      reservedHeight.value = null;
+      return;
+    }
+    if (props.mode !== "replace" || !props.preserveHeight || !root.value) return;
+    const height = root.value.getBoundingClientRect().height;
+    reservedHeight.value = height > 0 ? height : null;
+  },
+  { flush: "pre" }
+);
 
 const skeletonProps = computed(() => ({
   variant: "text" as const,
@@ -60,13 +100,21 @@ const spinnerProps = computed(() => ({
 
 <template>
   <div
+    ref="root"
     class="vslk-smart-loader"
     :class="`vslk-smart-loader--${props.mode}`"
+    :style="reservedHeight ? { minHeight: `${reservedHeight}px` } : undefined"
     :aria-busy="props.loading || undefined"
   >
     <template v-if="props.mode === 'replace'">
-      <slot v-if="showLoader" name="loader">
+      <slot v-if="view === 'loader'" name="loader">
         <Skeleton v-bind="skeletonProps" />
+      </slot>
+      <slot v-else-if="view === 'error'" name="error" :error="props.error" :retry="retry">
+        <div class="vslk-smart-loader__error" role="alert">
+          <p>Something went wrong.</p>
+          <button type="button" @click="retry">Try again</button>
+        </div>
       </slot>
       <slot v-else />
     </template>
@@ -74,14 +122,20 @@ const spinnerProps = computed(() => ({
     <template v-else>
       <div
         class="vslk-smart-loader__content"
-        :class="{ 'vslk-smart-loader__content--busy': showLoader }"
-        :inert="showLoader || undefined"
+        :class="{ 'vslk-smart-loader__content--busy': view !== 'content' }"
+        :inert="view !== 'content' || undefined"
       >
         <slot />
       </div>
-      <div v-if="showLoader" class="vslk-smart-loader__overlay">
-        <slot name="loader">
+      <div v-if="view !== 'content'" class="vslk-smart-loader__overlay">
+        <slot v-if="view === 'loader'" name="loader">
           <Spinner v-bind="spinnerProps" />
+        </slot>
+        <slot v-else name="error" :error="props.error" :retry="retry">
+          <div class="vslk-smart-loader__error" role="alert">
+            <p>Something went wrong.</p>
+            <button type="button" @click="retry">Try again</button>
+          </div>
         </slot>
       </div>
     </template>
@@ -107,6 +161,29 @@ const spinnerProps = computed(() => ({
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.vslk-smart-loader__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.vslk-smart-loader__error p {
+  margin: 0;
+}
+
+.vslk-smart-loader__error button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {

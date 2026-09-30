@@ -14,6 +14,12 @@ All notable changes to this project are documented here. The format follows
   `mode="overlay"` dims the content and centers a spinner over it. It also
   supports a `#loader` slot, a `label`, and `aria-busy` from the moment loading
   starts.
+- `SmartLoader` error state: an `error` prop shows a message with a **Try
+  again** button (`retry` event, `role="alert"`), customizable via the
+  `#error` slot. During a retry the error stays until the loader appears.
+- `SmartLoader` keeps the content's height while the loader stands in for it
+  (`replace` mode, `preserveHeight`, on by default), so the page below doesn't
+  jump.
 - **`useDelayedLoading`**: the timing logic behind `SmartLoader`, exported for
   loaders you render yourself.
 - **`ProgressBar`**: a linear progress indicator, determinate (`value`) or

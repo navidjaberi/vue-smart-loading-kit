@@ -5,6 +5,8 @@ import { SmartLoader, useDelayedLoading } from "vue-smart-loading-kit";
 const mode = ref<"replace" | "overlay">("replace");
 const delay = ref(200);
 const minDuration = ref(500);
+const preserveHeight = ref(true);
+const error = ref<string | null>(null);
 
 const loading = ref(false);
 const lastRun = ref<{ ms: number; shown: boolean } | null>(null);
@@ -17,21 +19,26 @@ watch(shown, (v) => {
 });
 
 let timer: ReturnType<typeof setTimeout> | undefined;
-function request(ms: number) {
+function request(ms: number, fail = false) {
   clearTimeout(timer);
   shownThisRun = false;
   loading.value = true;
   timer = setTimeout(() => {
     loading.value = false;
+    error.value = fail ? "Network error" : null;
     lastRun.value = { ms, shown: shownThisRun };
   }, ms);
 }
 onBeforeUnmount(() => clearTimeout(timer));
 
+// longer than the 3-item skeleton, so a height jump would be obvious
 const users = [
   { name: "Ada Lovelace", role: "Engineer" },
   { name: "Grace Hopper", role: "Rear Admiral" },
   { name: "Alan Turing", role: "Mathematician" },
+  { name: "Katherine Johnson", role: "Mathematician" },
+  { name: "Linus Torvalds", role: "Engineer" },
+  { name: "Margaret Hamilton", role: "Engineer" },
 ];
 
 const snippet = computed(() => {
@@ -39,6 +46,8 @@ const snippet = computed(() => {
   if (mode.value !== "replace") lines.push(`  mode="${mode.value}"`);
   if (delay.value !== 200) lines.push(`  :delay="${delay.value}"`);
   if (minDuration.value !== 500) lines.push(`  :min-duration="${minDuration.value}"`);
+  if (!preserveHeight.value) lines.push(`  :preserve-height="false"`);
+  lines.push(`  :error="error"`, `  @retry="load"`);
   if (mode.value === "replace") lines.push(`  :skeleton="{ variant: 'list', options: { items: 3 } }"`);
   lines.push(">", "  <UserList :users=\"users\" />", "</SmartLoader>");
   return lines.join("\n");
@@ -72,11 +81,18 @@ const snippet = computed(() => {
           <span>minDuration · {{ minDuration }}ms</span>
           <input v-model.number="minDuration" type="range" min="0" max="1500" step="50" />
         </label>
+        <label class="demo__check">
+          <input v-model="preserveHeight" type="checkbox" />
+          <span>preserveHeight</span>
+        </label>
       </div>
 
       <div class="demo__actions">
         <button class="demo__btn" :disabled="loading" @click="request(100)">Fast request · 100ms</button>
         <button class="demo__btn" :disabled="loading" @click="request(2000)">Slow request · 2s</button>
+        <button class="demo__btn demo__btn--ghost" :disabled="loading" @click="request(1000, true)">
+          Failing request
+        </button>
         <span class="demo__status" aria-live="polite">
           <template v-if="loading">Loading…</template>
           <template v-else-if="lastRun">
@@ -94,7 +110,10 @@ const snippet = computed(() => {
         :delay="delay"
         :min-duration="minDuration"
         :skeleton="{ variant: 'list', options: { items: 3 } }"
+        :preserve-height="preserveHeight"
+        :error="error"
         label="Loading users"
+        @retry="request(2000)"
       >
         <ul class="users">
           <li v-for="u in users" :key="u.name">
@@ -106,6 +125,7 @@ const snippet = computed(() => {
           </li>
         </ul>
       </SmartLoader>
+      <p class="demo__below">Content below the loader: with preserveHeight it never moves.</p>
     </section>
 
     <section class="demo__panel">
@@ -162,11 +182,31 @@ const snippet = computed(() => {
   border-radius: 8px;
   cursor: pointer;
 }
+.demo__btn--ghost {
+  background: transparent;
+  color: var(--accent);
+}
+.demo__controls .demo__check {
+  flex-direction: row;
+  align-items: center;
+}
+.demo__below {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
 .demo__btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
 .demo__status {
+  /* its own full-width line with a fixed height, so the text appearing
+     and changing never pushes the demo below it (which would undercut a
+     demo about not shifting the layout) */
+  flex-basis: 100%;
+  min-height: 1.5em;
   font-size: 13px;
   color: var(--muted);
 }
