@@ -15,12 +15,12 @@
     "isolatedModules": true,
     "esModuleInterop": true,
 
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     "types": [
+      "node",
       "vitest/globals",
       "@testing-library/jest-dom"
     ]

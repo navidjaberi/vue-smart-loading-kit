@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
-import { createApp } from "vue";
+import { createApp, nextTick } from "vue";
 import ProgressBar from "../src/components/ProgressBar/ProgressBar.vue";
 import VueSmartLoadingKit, { ProgressBar as ExportedProgressBar } from "../src/index";
 
@@ -41,13 +41,14 @@ describe("ProgressBar", () => {
       expect(root(wrapper).classList).toContain("vslk-progress--indeterminate");
     });
 
-    it("runs at half speed when reduced motion is requested", () => {
+    it("runs at half speed once mounted when reduced motion is requested", async () => {
       vi.stubGlobal("matchMedia", () => ({
         matches: true,
         addEventListener() {},
         removeEventListener() {},
       }));
       const wrapper = mount(ProgressBar, { props: { speed: 1 } });
+      await nextTick(); // applied after mount (see hydration.test.ts)
 
       expect(root(wrapper).style.getPropertyValue("--vslk-progress-duration")).toBe("3s");
     });

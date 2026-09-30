@@ -47,9 +47,11 @@ describe("Spinner prefers-reduced-motion", () => {
     expect(circleDuration(wrapper)).toBe("1s");
   });
 
-  it("slows down to half speed when reduced motion is requested", () => {
+  it("slows down to half speed once mounted when reduced motion is requested", async () => {
     mockReducedMotion(true);
     const wrapper = mount(Spinner, { props: { speed: 2 } });
+    // applied after mount, so the first render matches server HTML (see hydration.test.ts)
+    await nextTick();
 
     expect(circleDuration(wrapper)).toBe("1s");
   });

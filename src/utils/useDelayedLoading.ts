@@ -42,9 +42,14 @@ export function useDelayedLoading(
     show.value = true;
   };
 
+  // On the server the delay can never elapse and nothing would clear the
+  // timers, so the loader simply stays hidden until the client takes over.
+  const isServer = typeof window === "undefined";
+
   watch(
     () => toValue(loading),
     (isLoading) => {
+      if (isServer) return;
       if (isLoading) {
         // Restarted while held up by minDuration: just stay visible.
         clearTimeout(hideTimer);

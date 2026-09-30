@@ -9,8 +9,9 @@
   "scripts": {
     "dev": "vite playground",
     "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "build": "vite build && vue-tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm test && npm run build",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build",
     "build:playground": "vue-tsc -b playground && vite build playground"
   },
   "exports": {
@@ -22,7 +23,8 @@
     "./style.css": "./dist/style.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "keywords": [
     "vue",

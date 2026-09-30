@@ -6,6 +6,7 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 
 [![npm version](https://img.shields.io/npm/v/vue-smart-loading-kit)](https://www.npmjs.com/package/vue-smart-loading-kit)
 [![npm downloads](https://img.shields.io/npm/dm/vue-smart-loading-kit)](https://www.npmjs.com/package/vue-smart-loading-kit)
+[![CI](https://github.com/navidjaberi/vue-smart-loading-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/navidjaberi/vue-smart-loading-kit/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/vue-smart-loading-kit)](https://github.com/navidjaberi/vue-smart-loading-kit/blob/main/LICENSE)
 
 ---
@@ -474,10 +475,11 @@ npm run dev
 
 Every variant has its own controls and a copyable code snippet, plus a view that compares all variants side by side. The playground lives in `playground/` and is not part of the published package.
 
-Run tests:
+Run tests and the type check:
 
 ```bash
 npm test
+npm run typecheck
 ```
 
 Build the library:

@@ -1,0 +1,73 @@
+# Changelog
+
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
+[Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Added
+
+- **`SmartLoader`**: wraps content and shows a loader only when a load lasts
+  longer than `delay` (default 200ms), then keeps it for at least `minDuration`
+  (default 500ms). `mode="replace"` swaps the content for a skeleton, and
+  `mode="overlay"` dims the content and centers a spinner over it. It also
+  supports a `#loader` slot, a `label`, and `aria-busy` from the moment loading
+  starts.
+- **`useDelayedLoading`**: the timing logic behind `SmartLoader`, exported for
+  loaders you render yourself.
+- **`ProgressBar`**: a linear progress indicator, determinate (`value`) or
+  indeterminate.
+- **Spinner `arc` variant**: a Material-style arc. With `value` (0–100) it
+  shows determinate progress, announced as a `progressbar` when labelled.
+- Spinner `track` prop for `circle`, `ring` and `arc`.
+- Spinner `variant` prop with kebab-case names (`pulse-dots`), matching
+  Skeleton.
+- TypeScript declarations are now shipped, with exported prop types
+  (`SkeletonBaseProps`, `SkeletonOutline`, `SpinnerProps`, ...).
+- `SkeletonOutline` type and documentation for the outline's `width` and
+  `style`.
+- An unknown Skeleton `variant` falls back to `block` and warns in
+  development.
+- Spinners and `ProgressBar` run at half speed under `prefers-reduced-motion`.
+- Server-side rendering support (e.g. Nuxt). Components render without a DOM,
+  schedule no timers on the server, and hydrate without mismatches.
+- An interactive playground in the repository (`npm run dev`).
+
+### Changed
+
+- **The default Spinner `color` is now `currentColor`** (was `#3b82f6`), so
+  spinners inherit the surrounding text color, including in buttons and dark
+  mode. Pass `color="#3b82f6"` to keep the previous look.
+- Every spinner now renders a `size` × `size` box. The spacing of `dots` and
+  `bars` is slightly tighter as a result.
+- The Skeleton shimmer now travels along its `angle`, so `90` sweeps left to
+  right, and it is visible for most of each cycle instead of a brief flash.
+
+### Deprecated
+
+- The Spinner `type` prop and the camelCase names `pulseDots` and `orbitDots`.
+  Use `variant` with `pulse-dots` / `orbit-dots`. Both still work.
+
+### Fixed
+
+- `style.css` shipped the Vite starter's global styles, which restyled the host
+  app's `body`, headings, `:root` and `#app`.
+- `package.json` pointed `types` at a file that was never built.
+- String sizes such as `"3rem"` broke the `ring`, `pulse-dots` and `orbit-dots`
+  spinners, and shrank `dots`, `bars` and `orbit` to a few pixels.
+- The Skeleton `circle` ignored string sizes.
+- Props leaked into the DOM as HTML attributes (e.g. `variant="avatar"` on
+  skeleton shapes, `thickness` on spinners that don't use it).
+- The Skeleton `image` announced itself with `role="img"` inside a container
+  hidden from assistive tech.
+- The shimmer was cut off by a hard edge at some angles (e.g. 45° and 236°).
+- The `circle` spinner's track was invisible on dark backgrounds, and `orbit`
+  always drew a green track.
+- The `ring` spinner's segments fell out of order at speeds other than 1.
+- An unknown Skeleton variant rendered an empty, zero-height box.
+- `SmartLoader` failed to import and could not be used.
+
+## [0.1.0] - 2026-09-24
+
+- Initial release: `Skeleton` (13 variants) and `Spinner` (8 variants).
