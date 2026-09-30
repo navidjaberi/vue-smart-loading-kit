@@ -2,7 +2,7 @@
 
 A smart, lightweight, and customizable loading UI library for **Vue 3**.
 
-`vue-smart-loading-kit` provides a collection of ready-to-use **Skeleton** and **Spinner** components designed to make loading states simple, consistent, and easy to customize.
+`vue-smart-loading-kit` provides ready-to-use **Skeleton**, **Spinner** and **ProgressBar** components, plus **SmartLoader** and **PageProgress**, which decide *when* a loader is worth showing so fast loads never flash. Everything is designed to make loading states simple, consistent, and easy to customize.
 
 [![npm version](https://img.shields.io/npm/v/vue-smart-loading-kit)](https://www.npmjs.com/package/vue-smart-loading-kit)
 [![npm downloads](https://img.shields.io/npm/dm/vue-smart-loading-kit)](https://www.npmjs.com/package/vue-smart-loading-kit)

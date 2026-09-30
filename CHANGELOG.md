@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-30
+
 ### Added
 
 - **`SmartLoader`**: wraps content and shows a loader only when a load lasts
@@ -86,3 +88,7 @@ All notable changes to this project are documented here. The format follows
 ## [0.1.0] - 2026-09-24
 
 - Initial release: `Skeleton` (13 variants) and `Spinner` (8 variants).
+
+[Unreleased]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/navidjaberi/vue-smart-loading-kit/releases/tag/v0.1.0
