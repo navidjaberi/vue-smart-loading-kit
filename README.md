@@ -16,6 +16,7 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 * Lightweight and easy to integrate
 * Multiple Skeleton variants
 * Multiple Spinner variants, including a determinate progress arc
+* `ProgressBar`: a linear progress indicator, determinate or indeterminate
 * `SmartLoader`: no flash for fast loads, no blink for slow ones
 * Customizable size, radius, colors, animation, and more
 * Responsive by default
@@ -258,7 +259,32 @@ Pass `value` (0–100) to `arc` to show determinate progress, for example during
 <Spinner variant="arc" :value="uploadPercent" track label="Uploading file" />
 ```
 
-With a `label`, it is announced to screen readers as a `progressbar` with the current percentage. Other variants ignore `value` and log a warning in development.
+With a `label`, it is announced to screen readers as a `progressbar` with the current percentage. Other variants ignore `value` and log a warning in development. For a linear bar, see `ProgressBar` below.
+
+---
+
+# 📶 ProgressBar
+
+A linear progress indicator. It fills to `value` (0–100), or shows a sliding segment when `value` is left out.
+
+```vue
+<!-- determinate: e.g. a file upload -->
+<ProgressBar :value="uploadPercent" label="Uploading report.pdf" />
+
+<!-- indeterminate: e.g. a thin bar at the top of the page -->
+<ProgressBar :thickness="3" :track="false" />
+```
+
+| Prop        | Type                | Default          | Notes                                                        |
+| ----------- | ------------------- | ---------------- | ------------------------------------------------------------ |
+| `value`     | `number`            | —                | 0–100. Out-of-range values are clamped; omit for indeterminate. |
+| `color`     | `string`            | `"currentColor"` | Inherits the text color unless set.                          |
+| `track`     | `boolean \| string` | `true`           | The background rail. A string sets its color.                |
+| `thickness` | `number`            | `4`              | Bar height in px. The bar always spans the container's width. |
+| `speed`     | `number`            | `1`              | Speed of the indeterminate animation.                        |
+| `label`     | `string`            | —                | Announced as a `progressbar` with its percentage, or as a live status when indeterminate. |
+
+Like the spinners, it runs at half speed under `prefers-reduced-motion`.
 
 ---
 
@@ -364,7 +390,7 @@ const showLoader = useDelayedLoading(loading, { delay: 200, minDuration: 500 })
 The library ships with TypeScript declarations out of the box, so component props and public APIs are typed automatically when used in TypeScript projects.
 
 ```ts
-import { Skeleton, Spinner, SmartLoader, useDelayedLoading } from 'vue-smart-loading-kit'
+import { Skeleton, Spinner, ProgressBar, SmartLoader, useDelayedLoading } from 'vue-smart-loading-kit'
 import type { SkeletonVariantName, SpinnerProps } from 'vue-smart-loading-kit'
 ```
 

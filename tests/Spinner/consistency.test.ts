@@ -22,12 +22,16 @@ describe("Spinner color", () => {
   const VARIANTS_DIR = join(__dirname, "../../src/components/Spinner/variants");
   const COLOR_LITERAL = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(|\b(?:black|white|gray|grey|red|green|blue)\b/i;
 
-  const styleSources = readdirSync(VARIANTS_DIR)
-    .filter((f) => f.endsWith(".vue"))
-    .map((f) => {
-      const { descriptor } = parseSfc(readFileSync(join(VARIANTS_DIR, f), "utf8"));
-      return [f, descriptor.styles.map((s) => s.content).join("\n")] as const;
-    });
+  const PROGRESS_BAR = join(__dirname, "../../src/components/ProgressBar/ProgressBar.vue");
+  const styleSources = [
+    ...readdirSync(VARIANTS_DIR)
+      .filter((f) => f.endsWith(".vue"))
+      .map((f) => join(VARIANTS_DIR, f)),
+    PROGRESS_BAR,
+  ].map((path) => {
+    const { descriptor } = parseSfc(readFileSync(path, "utf8"));
+    return [path.split("/").pop()!, descriptor.styles.map((s) => s.content).join("\n")] as const;
+  });
 
   it.each(styleSources)("%s hardcodes no color in its styles", (_file, css) => {
     const literals: string[] = [];

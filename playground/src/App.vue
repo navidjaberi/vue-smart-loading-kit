@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { Skeleton, Spinner } from "vue-smart-loading-kit";
 import type { SkeletonVariantName, SpinnerVariantName } from "vue-smart-loading-kit";
 import SmartLoaderDemo from "./SmartLoaderDemo.vue";
+import ProgressBarDemo from "./ProgressBarDemo.vue";
 
 /* ------------------------------------------------------------------ */
 /* Catalog                                                             */
@@ -514,8 +515,9 @@ async function copySnippet() {
 
 const compare = ref(false);
 const smartDemo = ref(false);
+const progressDemo = ref(false);
 
-watch([family, current, compare, smartDemo], revealActiveNav);
+watch([family, current, compare, smartDemo, progressDemo], revealActiveNav);
 onMounted(revealActiveNav);
 
 function pick(fam: "skeleton" | "spinner", key: string) {
@@ -523,11 +525,13 @@ function pick(fam: "skeleton" | "spinner", key: string) {
   current.value = key;
   compare.value = false;
   smartDemo.value = false;
+  progressDemo.value = false;
 }
 
-function openView(view: "compare" | "smart") {
+function openView(view: "compare" | "smart" | "progress") {
   compare.value = view === "compare";
   smartDemo.value = view === "smart";
+  progressDemo.value = view === "progress";
 }
 </script>
 
@@ -550,7 +554,7 @@ function openView(view: "compare" | "smart") {
           v-for="(v, k) in SKELETONS"
           :key="'sk-' + k"
           class="nav"
-          :class="{ 'nav--on': family === 'skeleton' && current === k && !compare && !smartDemo }"
+          :class="{ 'nav--on': family === 'skeleton' && current === k && !compare && !smartDemo && !progressDemo }"
           @click="pick('skeleton', k)"
         >
           {{ v.name }}
@@ -563,7 +567,7 @@ function openView(view: "compare" | "smart") {
           v-for="(v, k) in SPINNERS"
           :key="'sp-' + k"
           class="nav"
-          :class="{ 'nav--on': family === 'spinner' && current === k && !compare && !smartDemo }"
+          :class="{ 'nav--on': family === 'spinner' && current === k && !compare && !smartDemo && !progressDemo }"
           @click="pick('spinner', k)"
         >
           {{ v.name }}
@@ -578,6 +582,9 @@ function openView(view: "compare" | "smart") {
         <button class="nav" :class="{ 'nav--on': smartDemo }" @click="openView('smart')">
           Smart loader
         </button>
+        <button class="nav" :class="{ 'nav--on': progressDemo }" @click="openView('progress')">
+          Progress bar
+        </button>
       </div>
     </aside>
 
@@ -585,6 +592,7 @@ function openView(view: "compare" | "smart") {
     <main class="main">
       <!-- Compare view -->
       <SmartLoaderDemo v-if="smartDemo" />
+      <ProgressBarDemo v-else-if="progressDemo" />
 
       <template v-else-if="compare">
         <header class="head">

@@ -83,7 +83,11 @@ describe("Arc spinner", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       mount(Spinner, { props: { variant: "dots", value: 50 } });
 
-      expect(warn.mock.calls.map((c) => String(c[0])).join("\n")).toMatch(/value.*"dots".*arc/);
+      const message = warn.mock.calls.map((c) => String(c[0])).join("\n");
+      expect(message).toMatch(/value.*"dots"/);
+      // points to the two components that CAN show progress
+      expect(message).toContain('variant="arc"');
+      expect(message).toContain("<ProgressBar>");
       warn.mockRestore();
     });
   });

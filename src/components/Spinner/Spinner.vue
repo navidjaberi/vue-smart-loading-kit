@@ -9,9 +9,10 @@ import Orbit from "./variants/Orbit.vue";
 import PulseDots from "./variants/PulseDots.vue";
 import OrbitDots from "./variants/OrbitDots.vue";
 import Arc from "./variants/Arc.vue";
-import type { Component, HTMLAttributes } from "vue";
+import type { Component } from "vue";
 import type { SpinnerProps, SpinnerVariantName } from "./spinner.types";
 import { usePrefersReducedMotion } from "../../utils/usePrefersReducedMotion";
+import { clampProgress, progressA11y } from "../../utils/progress";
 
 const props = withDefaults(defineProps<SpinnerProps>(), {
   size: 40,
@@ -73,9 +74,7 @@ const variantProps = computed(() => {
 });
 
 const progress = computed(() =>
-  accepted.value.includes("value") && typeof props.value === "number" && Number.isFinite(props.value)
-    ? Math.min(100, Math.max(0, props.value))
-    : null
+  accepted.value.includes("value") ? clampProgress(props.value) : null
 );
 
 watch(
@@ -83,27 +82,14 @@ watch(
   (unsupported) => {
     if (unsupported)
       warn(
-        `[vue-smart-loading-kit] Spinner \`value\` is ignored by variant "${variantName.value}"; ` +
-          `only "arc" can show progress.`
+        `[vue-smart-loading-kit] Spinner \`value\` is ignored by variant "${variantName.value}". ` +
+          `To show progress, use variant="arc" or <ProgressBar>.`
       );
   },
   { immediate: true }
 );
 
-/* Decorative by default. With a label it is announced: as a live status
-   while indeterminate, or as a progressbar with its percentage. */
-const a11y = computed<HTMLAttributes>(() => {
-  if (!props.label) return { "aria-hidden": true };
-  if (progress.value !== null)
-    return {
-      role: "progressbar",
-      "aria-valuemin": 0,
-      "aria-valuemax": 100,
-      "aria-valuenow": Math.round(progress.value),
-      "aria-label": props.label,
-    };
-  return { role: "status", "aria-live": "polite", "aria-busy": true };
-});
+const a11y = computed(() => progressA11y(props.label, progress.value));
 </script>
 
 <template>

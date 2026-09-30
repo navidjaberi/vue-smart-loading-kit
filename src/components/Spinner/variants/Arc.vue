@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { toCssSize, toPx } from "../../../utils/size";
 import { resolveTrack } from "../track";
+import { clampProgress } from "../../../utils/progress";
 
 interface Props {
   size?: number | string;
@@ -24,11 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
 const box = computed(() => toCssSize(props.size));
 const trackInfo = computed(() => resolveTrack(props.track));
 
-const progress = computed(() =>
-  typeof props.value === "number" && Number.isFinite(props.value)
-    ? Math.min(100, Math.max(0, props.value))
-    : null
-);
+const progress = computed(() => clampProgress(props.value));
 
 const speed = computed(() => (props.speed > 0 ? props.speed : 1));
 
