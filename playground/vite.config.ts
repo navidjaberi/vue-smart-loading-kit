@@ -4,6 +4,9 @@ import { fileURLToPath, URL } from 'node:url'
 
 // Run from the package root: `npm run dev` / `npm run build:playground`.
 export default defineConfig({
+  // Relative asset URLs, so the build works under any path (GitHub Pages
+  // serves it from /vue-smart-loading-kit/).
+  base: './',
   plugins: [vue()],
   resolve: {
     // Import the library straight from source: edits show up instantly,

@@ -9,6 +9,8 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 [![CI](https://github.com/navidjaberi/vue-smart-loading-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/navidjaberi/vue-smart-loading-kit/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/vue-smart-loading-kit)](https://github.com/navidjaberi/vue-smart-loading-kit/blob/main/LICENSE)
 
+**[▶ Live demo](https://navidjaberi.github.io/vue-smart-loading-kit/)**: every component with live controls and copyable code.
+
 ---
 
 ## ✨ Features
@@ -621,7 +623,7 @@ Start the interactive playground, which imports the components straight from `sr
 npm run dev
 ```
 
-Every variant has its own controls and a copyable code snippet, plus a view that compares all variants side by side. The playground lives in `playground/` and is not part of the published package.
+Every variant has its own controls and a copyable code snippet, plus a view that compares all variants side by side. The playground lives in `playground/` and is not part of the published package. Every push to `main` deploys it to the [live demo](https://navidjaberi.github.io/vue-smart-loading-kit/).
 
 Run tests and the type check:
 
