@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.stryker.config.ts"
+  },
+  "mutate": [
+    "src/**/*.{ts,vue}",
+    "!src/**/*.d.ts",
+    "!src/**/types.ts",
+    "!src/**/*.types.ts"
+  ],
+  "coverageAnalysis": "perTest",
+  "ignoreStatic": true,
+  "reporters": [
+    "clear-text",
+    "progress",
+    "html",
+    "json"
+  ],
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "concurrency": 6,
+  "plugins": [
+    "@stryker-mutator/vitest-runner",
+    "./scripts/stryker-vue-macros.mjs"
+  ],
+  "ignorers": [
+    "vue-macros"
+  ]
+}

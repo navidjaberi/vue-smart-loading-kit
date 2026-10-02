@@ -26,3 +26,7 @@ coverage
 
 # Vitest browser mode artifacts (failure screenshots)
 .vitest
+
+# Stryker (mutation testing)
+reports
+.stryker-tmp

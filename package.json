@@ -10,6 +10,7 @@
     "dev": "vite playground",
     "test": "vitest run --project unit",
     "test:coverage": "vitest run --project unit --coverage",
+    "test:mutation": "node scripts/stryker-vitest5-fix.mjs && stryker run",
     "test:browser": "vitest run --project browser",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "build": "vite build && vue-tsc -p tsconfig.build.json",
@@ -51,6 +52,8 @@
     "*.css"
   ],
   "devDependencies": {
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@types/node": "^24.19.0",
