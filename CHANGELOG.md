@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- A step-by-step `v-skeleton` guide in the demo and README: setup, placeholder
+  data for the first load, refreshing, `data-skeleton`, SmartLoader and config.
+
 ## [0.3.1] - 2026-10-02
 
 ### Fixed

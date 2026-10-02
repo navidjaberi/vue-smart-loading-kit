@@ -427,6 +427,47 @@ const showLoader = useDelayedLoading(loading, { delay: 200, minDuration: 500 })
 
 It is CSS only: the directive toggles a class, a few attributes and CSS variables on the element. The DOM is never changed, so it is safe with any Vue content.
 
+**Setup:** the plugin registers it (`app.use(VueSmartLoadingKit)` plus `import 'vue-smart-loading-kit/style.css'`). Without the plugin, import it in `<script setup>`, where an import named `vSkeleton` is available as `v-skeleton`:
+
+```ts
+import { vSkeleton } from 'vue-smart-loading-kit'
+```
+
+**Render something to skeletonize.** `v-skeleton` turns what is already on the page into a skeleton, so an empty list has nothing to turn into bars. On the first load, render placeholder data with the same shape as the real data:
+
+```vue
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+
+// Fake rows with realistic text lengths: they decide the skeleton's shape
+const placeholder = [1, 2, 3].map((id) => ({ id: -id, name: 'Placeholder name', bio: 'A short bio, about as long as a real one.' }))
+
+const users = ref(placeholder)
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    users.value = await fetch('/api/users').then((r) => r.json())
+  } catch {
+    users.value = []
+  } finally {
+    loading.value = false
+  }
+})
+</script>
+
+<template>
+  <ul v-skeleton="{ loading, delay: 0 }">
+    <li v-for="u in users" :key="u.id">
+      <strong>{{ u.name }}</strong>
+      <p>{{ u.bio }}</p>
+    </li>
+  </ul>
+</template>
+```
+
+The [live demo](https://navidjaberi.github.io/vue-smart-loading-kit/) has a step-by-step guide on its Skeletonize page.
+
 **Two ways to use it:**
 
 * **Refreshing real data:** keep the default `delay` (200ms), so quick refreshes don't flash.
