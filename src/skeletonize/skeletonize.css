@@ -1,0 +1,125 @@
+/* Skeletonize: restyles real content into a skeleton with the identical
+   layout. v-skeleton (or <SmartLoader mode="skeletonize">) puts
+   .vslk-skeletonize on the root and sets --vslk-sk-base, --vslk-sk-hi and
+   --vslk-sk-duration inline. Rules match the root or its descendants,
+   never inside [data-skeleton="ignore"], and never change a size: the
+   DOM is untouched and no rule alters box geometry.
+
+   background-color is deliberately not !important below: CSS animations
+   cannot override !important declarations, so the pulse keyframes would
+   never show. Animations do override normal page styles, so the bars
+   still win while animating. */
+
+/* Animation, chosen on the root and read by every painted part. */
+.vslk-skeletonize {
+  --vslk-skz-image: linear-gradient(90deg, var(--vslk-sk-base) 40%, var(--vslk-sk-hi) 50%, var(--vslk-sk-base) 60%);
+  --vslk-skz-anim: vslk-skz-shimmer var(--vslk-sk-duration, 1500ms) linear infinite;
+}
+.vslk-skeletonize.vslk-skeletonize--pulse {
+  --vslk-skz-image: none;
+  --vslk-skz-anim: vslk-skz-pulse var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
+}
+.vslk-skeletonize.vslk-skeletonize--none {
+  --vslk-skz-image: none;
+  --vslk-skz-anim: none;
+}
+
+/* 1. Hide all text. Layout, borders and container backgrounds stay.
+   color is inherited, so ancestors of an ignored element keep theirs
+   (otherwise the ignored text would inherit transparent and vanish);
+   every other descendant is still hidden on its own. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *, :has([data-skeleton="ignore"])) {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  caret-color: transparent !important;
+  user-select: none !important;
+}
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *)::placeholder {
+  color: transparent !important;
+}
+
+/* 2. Line bars. A "text block" is a text element with no media, controls,
+   lists, tables, divs or other text blocks inside. A "leaf" is any other
+   element with only text, outside text blocks (so <strong> in <p> gets no
+   second bar). data-skeleton="text" forces bars.
+   The mask has three layers: line stripes in the content box, plus the
+   border ring (border-box XOR padding-box), so element borders (table
+   grid lines) stay visible. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *, [data-skeleton="block"] *):is(
+    :is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend):not(:has(img, svg, video, canvas, iframe, button, input, select, textarea, table, ul, ol, div, p, h1, h2, h3, h4, h5, h6, li, blockquote, [data-skeleton])),
+    :not(:has(*)):not(:empty):not(img, svg, video, canvas, iframe, button, input, select, textarea, br, hr, [data-skeleton]):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"]) *),
+    [data-skeleton="text"]
+  ) {
+  background-color: var(--vslk-sk-base);
+  background-image: var(--vslk-skz-image) !important;
+  background-size: 300% 100% !important;
+  background-repeat: no-repeat !important;
+  animation: var(--vslk-skz-anim) !important;
+  mask-image:
+    repeating-linear-gradient(to bottom, #000 0 calc(1lh - 0.3em), transparent calc(1lh - 0.3em) 1lh),
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0);
+  mask-position: 0 0.15em, 0 0, 0 0;
+  mask-repeat: repeat, no-repeat, no-repeat;
+  mask-origin: content-box, border-box, padding-box;
+  mask-clip: content-box, border-box, padding-box;
+  mask-composite: add, exclude, add;
+}
+
+/* 3. Images and SVG become solid blocks of the same size and radius. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(img, svg) {
+  background-color: var(--vslk-sk-base);
+  background-image: var(--vslk-skz-image) !important;
+  background-size: 300% 100% !important;
+  animation: var(--vslk-skz-anim) !important;
+  object-position: -99999px 0 !important;
+}
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(svg) * {
+  fill: transparent !important;
+  stroke: transparent !important;
+}
+
+/* 4. Controls become solid blocks of the same shape; their insides vanish. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(button, input, select, textarea, [role="button"]) {
+  background-color: var(--vslk-sk-base);
+  background-image: var(--vslk-skz-image) !important;
+  background-size: 300% 100% !important;
+  animation: var(--vslk-skz-anim) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(button, [role="button"]) * {
+  visibility: hidden !important;
+}
+
+/* 5. Media that cannot be painted over keeps its space but is hidden. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(video, canvas, iframe) {
+  visibility: hidden !important;
+}
+
+/* 6. data-skeleton="block": one solid block, children hidden, size kept. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *)[data-skeleton="block"] {
+  background-color: var(--vslk-sk-base);
+  background-image: var(--vslk-skz-image) !important;
+  background-size: 300% 100% !important;
+  animation: var(--vslk-skz-anim) !important;
+}
+:is(.vslk-skeletonize, .vslk-skeletonize *)[data-skeleton="block"] * {
+  visibility: hidden !important;
+}
+
+@keyframes vslk-skz-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+@keyframes vslk-skz-pulse {
+  0%, 100% { background-color: var(--vslk-sk-base); }
+  50% { background-color: var(--vslk-sk-hi); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vslk-skeletonize.vslk-skeletonize {
+    --vslk-skz-anim: none;
+  }
+}

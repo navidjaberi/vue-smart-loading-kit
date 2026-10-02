@@ -7,6 +7,7 @@ import SmartLoader from './components/SmartLoader.vue'
 import ProgressBar from './components/ProgressBar/ProgressBar.vue'
 import PageProgress from './components/PageProgress/PageProgress.vue'
 import { vSkeleton } from './skeletonize/directive'
+import './skeletonize/skeletonize.css'
 export { Skeleton, Spinner, SmartLoader, ProgressBar, PageProgress }
 export { usePageProgress } from './utils/pageProgress'
 export { vSkeleton } from './skeletonize/directive'
