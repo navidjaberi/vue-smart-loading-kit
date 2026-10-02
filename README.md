@@ -55,6 +55,8 @@ Or with yarn:
 yarn add vue-smart-loading-kit
 ```
 
+**Upgrading from 0.1:** run `npm install vue-smart-loading-kit@latest`. Below 1.0, a `^0.1.0` range only matches `0.1.x`, so `npm update` never reaches `0.2` or later, which added `SmartLoader`, `v-skeleton` and the rest. If your dev server then still reports a missing export, delete Vite's cache (`node_modules/.cache`, and `.nuxt` in Nuxt) and restart it.
+
 ---
 
 ## 🚀 Quick Start
@@ -100,6 +102,22 @@ After global registration, the components can be used directly:
   <Spinner variant="dots" />
 </template>
 ```
+
+### Nuxt
+
+Register the plugin in a Nuxt plugin. Everything is SSR-safe:
+
+```ts
+// plugins/loading-kit.ts
+import VueSmartLoadingKit from 'vue-smart-loading-kit'
+import 'vue-smart-loading-kit/style.css'
+
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.vueApp.use(VueSmartLoadingKit)
+})
+```
+
+To have `PageProgress` follow page navigation, pass the router: `nuxtApp.vueApp.use(VueSmartLoadingKit, { router: useRouter() })`.
 
 ---
 
@@ -318,6 +336,7 @@ Like the spinners, it runs at half speed under `prefers-reduced-motion`.
 | --------------------- | ------------------------------------------------------------------------------ | --------------------------------- |
 | `replace` (default)   | Swaps the content for a skeleton                                               | First load, when there is no data |
 | `overlay`             | Keeps the content, dimmed and `inert`, and centers a spinner over it            | Refreshing data, submitting forms |
+| `skeletonize`         | Keeps the content and turns it into a matching skeleton with [`v-skeleton`](#-skeletonize) | First load with placeholder data, refreshing |
 
 ```vue
 <SmartLoader :loading="saving" mode="overlay" :spinner="{ variant: 'arc' }">
@@ -325,12 +344,23 @@ Like the spinners, it runs at half speed under `prefers-reduced-motion`.
 </SmartLoader>
 ```
 
+## SmartLoader or `v-skeleton`?
+
+`v-skeleton` only decides what loading **looks like**: it turns real content into a skeleton, with `delay` and `minDuration`. `SmartLoader` manages a whole loading state: when to show a loader, the error with a retry button, the screen-reader announcement and the content's height. Its `skeletonize` mode uses `v-skeleton` inside.
+
+| You want                                                      | Use                                        |
+| ------------------------------------------------------------- | ------------------------------------------ |
+| A small piece (a card, a row) and errors handled elsewhere    | `v-skeleton`                               |
+| A section that loads from an API, with an error and retry     | `<SmartLoader mode="skeletonize">`         |
+| A skeleton but no placeholder data to render                  | `<SmartLoader>` (`replace`, the default)   |
+| To keep showing the old data while it updates                 | `<SmartLoader mode="overlay">`             |
+
 ## Props
 
 | Prop          | Type                     | Default     | Notes                                                                 |
 | ------------- | ------------------------ | ----------- | --------------------------------------------------------------------- |
 | `loading`     | `boolean`                | required    |                                                                       |
-| `mode`        | `"replace" \| "overlay"` | `"replace"` |                                                                       |
+| `mode`        | `"replace" \| "overlay" \| "skeletonize"` | `"replace"` |                                             |
 | `delay`       | `number`                 | `200`       | ms a load must last before the loader appears. `0` shows it at once.  |
 | `minDuration` | `number`                 | `500`       | ms the loader stays once shown.                                       |
 | `skeleton`    | Skeleton props           | 3 text lines | Default loader in `replace` mode.                                    |

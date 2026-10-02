@@ -10,6 +10,8 @@ All notable changes to this project are documented here. The format follows
 
 - A step-by-step `v-skeleton` guide in the demo and README: setup, placeholder
   data for the first load, refreshing, `data-skeleton`, SmartLoader and config.
+- README: Nuxt setup, upgrading from 0.1, the `skeletonize` mode in the
+  SmartLoader tables, and when to use `SmartLoader` or `v-skeleton`.
 
 ## [0.3.1] - 2026-10-02
 
