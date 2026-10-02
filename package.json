@@ -68,7 +68,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/navidjaberi/vue-smart-loading-kit.git"
+    "url": "git+https://github.com/navidjaberi/vue-smart-loading-kit.git"
   },
   "bugs": {
     "url": "https://github.com/navidjaberi/vue-smart-loading-kit/issues"
