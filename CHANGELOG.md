@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- `SmartLoader` shows a string `error` as the error message. Other values
+  (`true`, an `Error`) keep the generic text.
 - `v-skeleton` finds the global and `provideLoadingConfig` config through
   Vue's public API only, no longer through an internal field that a future
   Vue release could remove.

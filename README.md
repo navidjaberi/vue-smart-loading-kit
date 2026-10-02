@@ -381,7 +381,13 @@ Use the `#loader` slot to render your own loader instead. The wrapper gets `aria
 
 When `error` is set (and no loader is showing), the content is replaced by a short message and a **Try again** button that emits `retry`. It is announced with `role="alert"`. During a retry the error stays on screen until the loader appears, so nothing flashes in between. In `overlay` mode the message sits over the dimmed content.
 
-The default text is English. Use the `#error` slot for your own UI or language. It receives the `error` and a `retry` function:
+If `error` is a string, it is shown as the message, so you can write it for your users (and in their language):
+
+```vue
+<SmartLoader :loading="loading" :error="failed ? 'Couldn\'t load your team. Check your connection.' : null" @retry="loadTeam">
+```
+
+Any other value (`true`, an `Error`) shows the generic "Something went wrong.", because an `Error`'s message is usually technical. For your own UI, use the `#error` slot. It receives the `error` and a `retry` function:
 
 ```vue
 <template #error="{ error, retry }">

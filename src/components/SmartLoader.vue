@@ -29,7 +29,8 @@ const props = withDefaults(
     spinner?: SpinnerProps;
     /** Announced to screen readers while the loader is visible. */
     label?: string;
-    /** Any truthy value (true, an Error, a message) shows the error state. */
+    /** Any truthy value (true, an Error, a message) shows the error state.
+     *  A string is shown as the message; anything else shows a generic one. */
     error?: unknown;
     /** replace mode: keep the content's height while the loader stands in
      *  for it, so the rest of the page doesn't jump. */
@@ -85,6 +86,13 @@ const view = computed(() =>
 
 const retry = () => emit("retry");
 
+/* A string is a message written for the user, so it is shown. An Error's
+   message is usually technical ("Failed to fetch"), so it gets the generic
+   text; the #error slot can show anything else. */
+const errorMessage = computed(() =>
+  typeof props.error === "string" && props.error.trim() ? props.error : "Something went wrong."
+);
+
 /* Layout shift: measure what is on screen right before the loader
    replaces it ("pre" runs before the DOM update, while the content is
    still there) and keep that height until the loader goes away. On a
@@ -137,7 +145,7 @@ const spinnerProps = computed(() => ({
       </slot>
       <slot v-else-if="view === 'error'" name="error" :error="props.error" :retry="retry">
         <div class="vslk-smart-loader__error" role="alert">
-          <p>Something went wrong.</p>
+          <p>{{ errorMessage }}</p>
           <button type="button" @click="retry">Try again</button>
         </div>
       </slot>
@@ -147,7 +155,7 @@ const spinnerProps = computed(() => ({
     <template v-else-if="mode === 'skeletonize'">
       <slot v-if="view === 'error'" name="error" :error="props.error" :retry="retry">
         <div class="vslk-smart-loader__error" role="alert">
-          <p>Something went wrong.</p>
+          <p>{{ errorMessage }}</p>
           <button type="button" @click="retry">Try again</button>
         </div>
       </slot>
@@ -176,7 +184,7 @@ const spinnerProps = computed(() => ({
         </slot>
         <slot v-else name="error" :error="props.error" :retry="retry">
           <div class="vslk-smart-loader__error" role="alert">
-            <p>Something went wrong.</p>
+            <p>{{ errorMessage }}</p>
             <button type="button" @click="retry">Try again</button>
           </div>
         </slot>

@@ -141,6 +141,20 @@ describe("SmartLoader — error state", () => {
     expect(wrapper.find(".content").exists()).toBe(false);
   });
 
+  it.each(["replace", "overlay", "skeletonize"] as const)("shows a string error as the message (%s mode)", (mode) => {
+    const wrapper = mountLoader({ mode, loading: false, error: "Couldn't load your users." });
+
+    const alert = wrapper.find('[role="alert"]');
+    expect(alert.find("p").text()).toBe("Couldn't load your users.");
+  });
+
+  it("keeps the default message for an Error, true, or a blank string", () => {
+    for (const error of [new Error("ECONNRESET at socket"), true, "   "]) {
+      const alert = mountLoader({ loading: false, error }).find('[role="alert"]');
+      expect(alert.find("p").text(), String(error)).toBe("Something went wrong.");
+    }
+  });
+
   it("emits retry from the default button", async () => {
     const wrapper = mountLoader({ loading: false, error: true });
 

@@ -199,3 +199,16 @@ describe("provideLoadingConfig", () => {
     expect(mount(Root).find(".vslk-spinner-dots").exists()).toBe(true);
   });
 });
+
+describe("mergeLoadingConfig", () => {
+  it("keeps the sections an override doesn't touch, and merges the ones it does", async () => {
+    const { mergeLoadingConfig } = await import("../src/config");
+    const base = { skeleton: { color: "#111111", animation: "pulse" as const }, spinner: { variant: "dots" as const } };
+
+    expect(mergeLoadingConfig(base, { skeleton: { color: "#222222" } })).toEqual({
+      skeleton: { color: "#222222", animation: "pulse" },
+      spinner: { variant: "dots" },
+    });
+    expect(mergeLoadingConfig(base, { progressBar: { thickness: 2 } })).toEqual({ ...base, progressBar: { thickness: 2 } });
+  });
+});
