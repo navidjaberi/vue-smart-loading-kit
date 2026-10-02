@@ -647,7 +647,7 @@ npm run build
 
 **1,400+ unit tests and 11 real-browser tests**, run on Node 20 and 22 for every push and pull request. Coverage is **100% of lines** (96% of branches), and CI fails if it drops below the thresholds in `vitest.config.ts`.
 
-Coverage only shows that code *ran*. **Mutation testing** ([Stryker](https://stryker-mutator.io/)) shows the tests would *catch a bug*: it plants small bugs in the source (flips a condition, changes a default, drops a call) and reruns the tests against each one. The **mutation score is 92%**: 92% of those planted bugs make a test fail. The surviving gaps it found led to new tests and two real bug fixes.
+Coverage only shows that code *ran*. **Mutation testing** ([Stryker](https://stryker-mutator.io/)) shows the tests would *catch a bug*: it plants small bugs in the source (flips a condition, changes a default, drops a call) and reruns the tests against each one. The **mutation score is over 90%** (live in the badge above): over 90% of those planted bugs make a test fail. The surviving gaps it found led to new tests and two real bug fixes.
 
 Both reports are published with the demo: [coverage](https://navidjaberi.github.io/vue-smart-loading-kit/coverage/) and [mutation](https://navidjaberi.github.io/vue-smart-loading-kit/mutation/).
 
