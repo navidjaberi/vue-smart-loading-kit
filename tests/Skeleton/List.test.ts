@@ -238,4 +238,38 @@ describe("List Variant", () => {
     const list = wrapper.find(".vslk-list");
     expect(list.element).toHaveStyle({ width: "300px" });
   });
+
+  // Spacing defaults, pinned by mutation testing (npm run test:mutation)
+  describe("spacing and borders", () => {
+    const list = (options: Record<string, unknown> = {}) =>
+      mount(Skeleton, { props: { variant: "list", options: { items: 2, ...options } } });
+
+    it("defaults to a 12px item gap, 8px content gap, 12px 0 padding and a soft border", () => {
+      const w = list();
+      expect(w.find(".vslk-list").element).toHaveStyle({ gap: "12px" });
+      expect(w.find(".vslk-list__content").element).toHaveStyle({ gap: "8px" });
+      const item = w.find(".vslk-list__item").element as HTMLElement;
+      expect(item).toHaveStyle({ padding: "12px 0px" });
+      expect(item.style.borderBottomColor).toBe("rgba(148, 163, 184, 0.18)");
+    });
+
+    it("converts numeric spacing to px and passes strings through", () => {
+      const px = list({ itemGap: 4, contentGap: 6, padding: 10, borderColor: "red" });
+      expect(px.find(".vslk-list").element).toHaveStyle({ gap: "4px" });
+      expect(px.find(".vslk-list__content").element).toHaveStyle({ gap: "6px" });
+      expect(px.find(".vslk-list__item").element).toHaveStyle({ padding: "10px" });
+      expect((px.find(".vslk-list__item").element as HTMLElement).style.borderBottomColor).toBe("red");
+
+      const raw = list({ itemGap: "1rem", contentGap: "2rem", padding: "3rem" });
+      expect(raw.find(".vslk-list").element).toHaveStyle({ gap: "1rem" });
+      expect(raw.find(".vslk-list__content").element).toHaveStyle({ gap: "2rem" });
+      expect(raw.find(".vslk-list__item").element).toHaveStyle({ padding: "3rem" });
+    });
+
+    it("cycles every preset width from the third line on", () => {
+      const w = mount(Skeleton, { props: { variant: "list", options: { items: 1, lines: 7 } } });
+      const widths = textComponents(w).map((c) => c.props("width"));
+      expect(widths.slice(2)).toEqual(["62%", "84%", "70%", "90%", "75%"]);
+    });
+  });
 });

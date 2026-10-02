@@ -4,7 +4,7 @@ const clamp255 = (x: number) => Math.max(0, Math.min(255, Math.round(x)));
 
 function parseHex(hex: string): RGBA | null {
   const h = hex.replace("#", "").trim();
-  if (![3, 4, 6, 8].includes(h.length)) return null;
+  if (![3, 4, 6, 8].includes(h.length) || !/^[0-9a-f]+$/i.test(h)) return null;
 
   const expand = (s: string) => (s.length === 1 ? s + s : s);
 
@@ -25,7 +25,6 @@ function parseHex(hex: string): RGBA | null {
     if (h.length === 8) a = parseInt(h.slice(6, 8), 16);
   }
 
-  if ([r, g, b, a].some((n) => Number.isNaN(n))) return null;
   return { r, g, b, a: a / 255 };
 }
 

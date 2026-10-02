@@ -53,8 +53,10 @@ function boundFrom(vnode: VNode): Map<string, string | null> {
   return new Map(
     MANAGED_ATTRS.map((name) => {
       const v = props[name];
-      if (v === undefined || v === null || v === false) return [name, null];
-      if (v === true) return [name, name === "inert" ? "" : "true"];
+      // Mirror Vue: null/undefined remove the attribute, and booleans render
+      // as "true"/"false", except inert, which Vue sets as a DOM property.
+      if (v === undefined || v === null) return [name, null];
+      if (name === "inert" && typeof v === "boolean") return [name, v ? "" : null];
       return [name, String(v)];
     })
   );

@@ -113,4 +113,30 @@ describe("OrbitDots Spinner (via Spinner wrapper, type='orbitDots')", () => {
     const other = mount(Spinner, { props: { type: "circle" } });
     expect(other.find(".vslk-spinner-orbit-dots").exists()).toBe(false);
   });
+
+  // Orbit geometry, pinned by mutation testing (npm run test:mutation)
+  describe("orbit geometry", () => {
+    const core = (props: Record<string, unknown>) =>
+      mount(Spinner, { props: { variant: "orbit-dots", ...props } }).find(".dot-core").element as HTMLElement;
+
+    it("puts the dots on a radius of size * 3/8 and pulses them 28% of it inward (px)", () => {
+      const el = core({ size: 80 });
+      expect(el.style.getPropertyValue("--orbit-radius")).toBe("30px");
+      expect(el.style.getPropertyValue("--inward-offset")).toBe("8.4px");
+      expect(el).toHaveStyle({ width: "20px", height: "20px" });
+    });
+
+    it("uses calc() for non-px sizes", () => {
+      const el = core({ size: "3rem" });
+      expect(el.style.getPropertyValue("--orbit-radius")).toBe("calc(3rem * 0.375)");
+      expect(el.style.getPropertyValue("--inward-offset")).toBe("calc(3rem * 0.105)");
+      expect(el.style.width).toBe("calc(0.75rem)"); // jsdom simplifies calc(3rem / 4)
+    });
+
+    it("runs one orbit per second at speed 1, and treats a non-positive speed as 1", () => {
+      expect(core({ speed: 2 }).style.animationDuration).toBe("0.5s");
+      expect(core({ speed: 0 }).style.animationDuration).toBe("1s");
+      expect(core({ speed: -1 }).style.animationDuration).toBe("1s");
+    });
+  });
 });

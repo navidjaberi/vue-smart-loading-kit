@@ -189,3 +189,133 @@ describe("v-skeleton review fixes", () => {
     expect(el(w).getAttribute("aria-hidden")).toBe("false");
   });
 });
+
+// Gaps found by mutation testing (npm run test:mutation)
+describe("v-skeleton restores and configures exactly", () => {
+  it("restores boolean-bound aria attributes the way Vue renders them", async () => {
+    const attrs = { "aria-hidden": false, "aria-busy": false } as const;
+    const plain = mount({ render: () => h("section", attrs) }).element as HTMLElement;
+    const loading = ref(true);
+    const Comp = defineComponent({
+      render: () =>
+        withDirectives(h("section", { class: "host", ...attrs }, [h("p", "Ada")]), [
+          [vSkeleton, { loading: loading.value, delay: 0, minDuration: 0 }],
+        ]),
+    });
+    const w = mount(Comp);
+
+    expect(el(w).getAttribute("aria-hidden")).toBe("true");
+    loading.value = false;
+    await nextTick();
+
+    for (const name of Object.keys(attrs)) {
+      expect(el(w).getAttribute(name), name).toBe(plain.getAttribute(name));
+    }
+  });
+
+  it("restores a template-bound inert after loading ends", async () => {
+    const loading = ref(true);
+    const Comp = defineComponent({
+      render: () =>
+        withDirectives(h("section", { class: "host", inert: "" }, [h("p", "Ada")]), [
+          [vSkeleton, { loading: loading.value, delay: 0, minDuration: 0 }],
+        ]),
+    });
+    const w = mount(Comp);
+
+    loading.value = false;
+    await nextTick();
+
+    expect(el(w).getAttribute("inert")).toBe("");
+  });
+
+  it("uses a configured delay and minDuration when the binding has none", async () => {
+    const value = ref<SkeletonDirectiveValue>(true);
+    const w = mount(host(value), {
+      global: { plugins: [[VueSmartLoadingKit, { smartLoader: { delay: 50, minDuration: 1000 } }]] },
+    });
+
+    vi.advanceTimersByTime(49);
+    expect(isSkeleton(el(w))).toBe(false);
+    vi.advanceTimersByTime(1);
+    expect(isSkeleton(el(w))).toBe(true);
+
+    value.value = false;
+    await nextTick();
+    vi.advanceTimersByTime(999);
+    expect(isSkeleton(el(w))).toBe(true);
+    vi.advanceTimersByTime(1);
+    expect(isSkeleton(el(w))).toBe(false);
+  });
+
+  it("sets every appearance variable, inert, and exactly one animation class", () => {
+    const w = mount(host(ref<SkeletonDirectiveValue>({ loading: true, delay: 0 })), {
+      global: { plugins: [[VueSmartLoadingKit, { skeleton: { animation: "pulse", highlight: "#abcdef" } }]] },
+    });
+
+    expect(el(w).style.getPropertyValue("--vslk-sk-hi")).toBe("#abcdef");
+    expect(el(w).style.getPropertyValue("--vslk-sk-duration")).toBe("1500ms");
+    expect(el(w).getAttribute("inert")).toBe("");
+    expect([...el(w).classList].filter((c) => c.startsWith("vslk-skeletonize--"))).toEqual(["vslk-skeletonize--pulse"]);
+  });
+
+  it("keeps aria-busy set when Vue re-patches it mid-load", async () => {
+    const busy = ref<string | undefined>(undefined);
+    const Comp = defineComponent({
+      render: () =>
+        withDirectives(h("section", { class: "host", "aria-busy": busy.value }, [h("p", "Ada")]), [
+          [vSkeleton, { loading: true, delay: 1000 }],
+        ]),
+    });
+    const w = mount(Comp);
+
+    busy.value = "false";
+    await nextTick();
+
+    expect(el(w).getAttribute("aria-busy")).toBe("true");
+  });
+
+  it("removes its state on unmount, so the element can be skeletonized again", async () => {
+    const show = ref(true);
+    const Comp = defineComponent({
+      render: () =>
+        show.value
+          ? withDirectives(h("section", { class: "host" }, [h("p", "Ada")]), [[vSkeleton, { loading: true, delay: 0 }]])
+          : h("div"),
+    });
+    const w = mount(Comp);
+    const node = el(w);
+
+    show.value = false;
+    await nextTick();
+
+    expect(isSkeleton(node)).toBe(false);
+    expect(node.hasAttribute("inert")).toBe(false);
+    expect(node.hasAttribute("aria-hidden")).toBe(false);
+  });
+});
+
+describe("v-skeleton getSSRProps", () => {
+  const ssr = (value: SkeletonDirectiveValue) =>
+    vSkeleton.getSSRProps!({ value, instance: null } as never, null as never);
+
+  it("renders the full skeleton for delay 0", () => {
+    expect(ssr({ loading: true, delay: 0 })).toEqual({
+      class: "vslk-skeletonize vslk-skeletonize--shimmer",
+      style: {
+        "--vslk-sk-base": "rgba(148, 163, 184, 0.22)",
+        "--vslk-sk-hi": "rgba(202, 209, 220, 0.28)",
+        "--vslk-sk-duration": "1500ms",
+      },
+      inert: "",
+      "aria-hidden": "true",
+      "aria-busy": "true",
+      "data-allow-mismatch": "class,style,attribute",
+    });
+  });
+
+  it("renders only aria-busy while a delay is pending, and nothing when idle", () => {
+    expect(ssr(true)).toEqual({ "aria-busy": "true" });
+    expect(ssr(false)).toEqual({});
+  });
+});

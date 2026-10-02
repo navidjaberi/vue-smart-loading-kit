@@ -246,4 +246,38 @@ describe("Skeleton / Image Variant", () => {
       expect(st.includes("aspect-ratio:")).toBe(false);
     });
   });
+
+  // The image element itself, not only the wrapper's CSS variables
+  // (pinned by mutation testing: npm run test:mutation)
+  describe("image element size", () => {
+    const image = (props: Parameters<typeof mountImage>[0]) =>
+      findImageRoot(mountImage(props)).element as HTMLElement;
+
+    it("sets numeric width, height and radius in px", () => {
+      expect(image({ width: 320, height: 180, radius: 16 })).toHaveStyle({
+        width: "320px",
+        height: "180px",
+        borderRadius: "16px",
+      });
+    });
+
+    it("passes string width, height and radius through", () => {
+      expect(image({ width: "12rem", height: "40vh", radius: "50%" })).toHaveStyle({
+        width: "12rem",
+        height: "40vh",
+        borderRadius: "50%",
+      });
+    });
+
+    it("sets no size or radius of its own by default", () => {
+      const style = findImageRoot(mountImage()).attributes("style") ?? "";
+      expect(style).not.toMatch(/(^|;)\s*(width|height|border-radius):/);
+    });
+
+    it("lets an explicit height win over options.ratio", () => {
+      const el = image({ height: 100, options: { ratio: "16:9" } });
+      expect(el).toHaveStyle({ height: "100px" });
+      expect(el.getAttribute("style")).not.toContain("aspect-ratio");
+    });
+  });
 });

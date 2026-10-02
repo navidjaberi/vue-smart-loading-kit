@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `v-skeleton` restores an aria attribute bound to `false` as `"false"`,
+  the way Vue renders it, instead of removing it.
+- The automatic highlight no longer treats a malformed hex color such as
+  `#12345z` as valid.
+
 ## [0.3.0] - 2026-10-02
 
 ### Added
