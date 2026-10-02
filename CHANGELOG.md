@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **`v-skeleton`**: turns real rendered content into a skeleton with the
+  identical layout (one bar per text line, solid images and controls,
+  container borders kept) using CSS only, so nothing moves. It supports
+  `delay` and `minDuration`, is `inert` and `aria-hidden` while shown,
+  restores your own aria attributes, renders in SSR for `delay: 0`, and
+  offers `data-skeleton="ignore"`, `"block"` and `"text"` for per-element
+  control.
+- `SmartLoader` `mode="skeletonize"`: keeps the content and skeletonizes it,
+  with SmartLoader's timing, error state and `label` announcement.
+
 ## [0.2.0] - 2026-09-30
 
 ### Added

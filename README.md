@@ -20,6 +20,7 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 * `ProgressBar`: a linear progress indicator, determinate or indeterminate
 * `SmartLoader`: no flash for fast loads, no blink for slow ones
 * `PageProgress`: a top-of-page bar for route changes and requests, replacing NProgress
+* `v-skeleton`: turns your real content into a matching skeleton, with no hand-built placeholders
 * Global config: set app-wide defaults once
 * Customizable size, radius, colors, animation, and more
 * Responsive by default
@@ -411,6 +412,52 @@ const showLoader = useDelayedLoading(loading, { delay: 200, minDuration: 500 })
 
 ---
 
+# 🦴 Skeletonize
+
+`v-skeleton` turns the content you already render into a skeleton with **exactly the same layout**: text becomes one bar per line, images and buttons become blocks, and container borders and spacing stay. Nothing is hand-built and nothing moves, because the same elements stay in place.
+
+```vue
+<UserCard v-skeleton="loading" :user="user" />
+<div v-skeleton="{ loading, delay: 0, minDuration: 500 }">...</div>
+```
+
+It is CSS only: the directive toggles a class, a few attributes and CSS variables on the element. The DOM is never changed, so it is safe with any Vue content.
+
+**Two ways to use it:**
+
+* **Refreshing real data:** keep the default `delay` (200ms), so quick refreshes don't flash.
+* **Placeholder data on first load:** render the component with fake data and use `delay: 0`, so the fake content is never visible. With SSR it is skeletonized in the server HTML already.
+
+While skeletonized, the element is `inert` and `aria-hidden` (fake or stale content is neither read nor clickable), and `aria-busy` is set as soon as loading starts. Any `aria-hidden`, `aria-busy` or `inert` you set yourself is restored afterwards. Colors and animation come from the `skeleton` section of the global config, and the timing defaults from `smartLoader`.
+
+## Per-element control
+
+| Attribute                 | Effect                                                                  |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `data-skeleton="ignore"`  | The element and its children stay as they are (e.g. a static heading). |
+| `data-skeleton="block"`   | The whole element becomes one solid block (charts, initials avatars, badges). |
+| `data-skeleton="text"`    | Forces line bars where text and elements are mixed.                    |
+
+## With SmartLoader
+
+`mode="skeletonize"` keeps SmartLoader's timing, error state and `label` announcement, and skeletonizes its content:
+
+```vue
+<SmartLoader :loading="loading" mode="skeletonize" label="Loading users">
+  <UserList :users="users" />
+</SmartLoader>
+```
+
+## Limitations
+
+* The last line of a wrapped paragraph gets a full-width bar, because CSS cannot know its real length.
+* A few characters on a colored shape (initials avatars, badges) look like a line of text to CSS and would get stripes. Mark them `data-skeleton="block"`.
+* `video`, `canvas` and `iframe` are hidden but keep their space. Wrap them in `data-skeleton="block"` for a solid block.
+* Direct text of an element that also contains a `data-skeleton="ignore"` child stays visible, because its color can't be hidden without also hiding the ignored text.
+* Requires evergreen browsers from late 2023 on, for the `lh` unit, `:has()` and `mask-composite`.
+
+---
+
 # 🧭 PageProgress
 
 A thin bar pinned to the top of the page, like the ones on GitHub or YouTube. Place it once, then let it follow your router, your own tasks, or both:
@@ -492,7 +539,7 @@ provideLoadingConfig({ skeleton: { color: 'rgba(255, 255, 255, 0.12)' } })
 The library ships with TypeScript declarations out of the box, so component props and public APIs are typed automatically when used in TypeScript projects.
 
 ```ts
-import { Skeleton, Spinner, ProgressBar, SmartLoader, PageProgress, usePageProgress } from 'vue-smart-loading-kit'
+import { Skeleton, Spinner, ProgressBar, SmartLoader, PageProgress, usePageProgress, vSkeleton } from 'vue-smart-loading-kit'
 import type { LoadingKitConfig, SkeletonVariantName, SpinnerProps } from 'vue-smart-loading-kit'
 ```
 
@@ -581,6 +628,7 @@ Run tests and the type check:
 ```bash
 npm test
 npm run typecheck
+npm run test:browser   # visual rules in a real Chromium (run `npx playwright install chromium` once)
 ```
 
 Build the library:
