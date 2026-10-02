@@ -1,4 +1,4 @@
-import { effectScope, ref, watch, type DirectiveBinding, type EffectScope, type ObjectDirective, type Ref } from "vue";
+import { effectScope, ref, watch, type DirectiveBinding, type EffectScope, type ObjectDirective, type Ref, type VNode } from "vue";
 import { DEFAULT_DELAY, DEFAULT_MIN_DURATION, useDelayedLoading } from "../utils/useDelayedLoading";
 import { LOADING_CONFIG, type LoadingKitConfig } from "../config";
 import { resolveSkeletonAppearance } from "./appearance";
@@ -9,6 +9,8 @@ export const SKELETONIZE_CLASS = "vslk-skeletonize";
 const ANIMATION_CLASSES = ["shimmer", "pulse", "none"].map((a) => `${SKELETONIZE_CLASS}--${a}`);
 const VARS = ["--vslk-sk-base", "--vslk-sk-hi", "--vslk-sk-duration"];
 const SKELETON_ATTRS = ["inert", "aria-hidden"] as const;
+/** Attributes the directive may override (or that SSR may have rendered). */
+const MANAGED_ATTRS = ["inert", "aria-hidden", "aria-busy", "data-allow-mismatch"] as const;
 
 interface Resolved {
   loading: boolean;
@@ -19,7 +21,11 @@ interface State {
   scope: EffectScope;
   value: Ref<Resolved>;
   config: Ref<LoadingKitConfig>;
-  saved: Map<string, string | null>;
+  shown: Ref<boolean>;
+  /** What the template itself binds for each managed attribute (null = absent). */
+  bound: Map<string, string | null>;
+  /** Attributes currently carrying the directive's (or SSR's) value. */
+  overridden: Set<string>;
 }
 const states = new WeakMap<HTMLElement, State>();
 
@@ -38,17 +44,31 @@ function resolve(value: SkeletonDirectiveValue, config: LoadingKitConfig): Resol
   };
 }
 
-/* Attributes the directive overrides are saved once and put back exactly,
-   so an element's own aria-hidden="false" or inert survives a load. */
-function save(el: HTMLElement, state: State, name: string) {
-  if (!state.saved.has(name)) state.saved.set(name, el.getAttribute(name));
+/* The value to restore is what the TEMPLATE binds (read from the vnode on
+   every mount/update), never what is in the DOM: after SSR the DOM already
+   holds the skeleton's own inert/aria-hidden, and a bound value may change
+   mid-load. */
+function boundFrom(vnode: VNode): Map<string, string | null> {
+  const props = (vnode.props ?? {}) as Record<string, unknown>;
+  return new Map(
+    MANAGED_ATTRS.map((name) => {
+      const v = props[name];
+      if (v === undefined || v === null || v === false) return [name, null];
+      if (v === true) return [name, name === "inert" ? "" : "true"];
+      return [name, String(v)];
+    })
+  );
 }
-function restore(el: HTMLElement, state: State, name: string) {
-  if (!state.saved.has(name)) return;
-  const previous = state.saved.get(name)!;
-  if (previous === null) el.removeAttribute(name);
-  else el.setAttribute(name, previous);
-  state.saved.delete(name);
+
+function override(el: HTMLElement, state: State, name: string, value: string) {
+  state.overridden.add(name);
+  el.setAttribute(name, value);
+}
+function release(el: HTMLElement, state: State, name: string) {
+  if (!state.overridden.delete(name)) return;
+  const bound = state.bound.get(name) ?? null;
+  if (bound === null) el.removeAttribute(name);
+  else el.setAttribute(name, bound);
 }
 
 function show(el: HTMLElement, state: State) {
@@ -58,15 +78,14 @@ function show(el: HTMLElement, state: State) {
   el.style.setProperty("--vslk-sk-base", look.base);
   el.style.setProperty("--vslk-sk-hi", look.highlight);
   el.style.setProperty("--vslk-sk-duration", look.duration);
-  for (const name of SKELETON_ATTRS) save(el, state, name);
-  el.setAttribute("inert", "");
-  el.setAttribute("aria-hidden", "true");
+  override(el, state, "inert", "");
+  override(el, state, "aria-hidden", "true");
 }
 
 function hide(el: HTMLElement, state: State) {
   el.classList.remove(SKELETONIZE_CLASS, ...ANIMATION_CLASSES);
   for (const v of VARS) el.style.removeProperty(v);
-  for (const name of SKELETON_ATTRS) restore(el, state, name);
+  for (const name of SKELETON_ATTRS) release(el, state, name);
 }
 
 /**
@@ -75,15 +94,23 @@ function hide(el: HTMLElement, state: State) {
  * (see skeletonize.css). Only classes, attributes and CSS variables change.
  */
 export const vSkeleton: ObjectDirective<HTMLElement, SkeletonDirectiveValue> = {
-  mounted(el, binding) {
+  mounted(el, binding, vnode) {
     const config = ref(configOf(binding)) as Ref<LoadingKitConfig>;
     const state: State = {
       scope: effectScope(true),
       value: ref(resolve(binding.value, config.value)),
       config,
-      saved: new Map(),
+      shown: ref(false),
+      bound: boundFrom(vnode),
+      overridden: new Set(),
     };
     states.set(el, state);
+
+    // Anything SSR rendered that the template doesn't bind is ours to release.
+    for (const name of MANAGED_ATTRS) {
+      if (el.hasAttribute(name) && state.bound.get(name) === null) state.overridden.add(name);
+    }
+    release(el, state, "data-allow-mismatch"); // only needed during hydration
 
     state.scope.run(() => {
       const shown = useDelayedLoading(() => state.value.value.loading, {
@@ -92,24 +119,32 @@ export const vSkeleton: ObjectDirective<HTMLElement, SkeletonDirectiveValue> = {
       });
       watch(
         () => state.value.value.loading,
-        (loading) => {
-          if (loading) {
-            save(el, state, "aria-busy");
-            el.setAttribute("aria-busy", "true");
-          } else restore(el, state, "aria-busy");
+        (loading) => (loading ? override(el, state, "aria-busy", "true") : release(el, state, "aria-busy")),
+        { immediate: true, flush: "sync" }
+      );
+      watch(
+        shown,
+        (isShown) => {
+          state.shown.value = isShown;
+          if (isShown) show(el, state);
+          else hide(el, state);
         },
         { immediate: true, flush: "sync" }
       );
-      watch(shown, (isShown) => (isShown ? show(el, state) : hide(el, state)), { immediate: true, flush: "sync" });
     });
   },
 
-  updated(el, binding) {
+  updated(el, binding, vnode) {
     const state = states.get(el);
     if (!state) return;
+    state.bound = boundFrom(vnode);
     state.config.value = configOf(binding);
     state.value.value = resolve(binding.value, state.config.value);
-    if (el.classList.contains(SKELETONIZE_CLASS)) show(el, state); // pick up appearance changes
+    /* Vue may just have re-patched class, style or the aria attributes
+       (e.g. a :class change mid-load), wiping what the directive set:
+       re-apply the current state. */
+    if (state.shown.value) show(el, state);
+    if (state.value.value.loading) override(el, state, "aria-busy", "true");
   },
 
   unmounted(el) {
@@ -117,7 +152,7 @@ export const vSkeleton: ObjectDirective<HTMLElement, SkeletonDirectiveValue> = {
     if (!state) return;
     state.scope.stop();
     hide(el, state);
-    restore(el, state, "aria-busy");
+    release(el, state, "aria-busy");
     states.delete(el);
   },
 

@@ -119,3 +119,73 @@ describe("v-skeleton attributes", () => {
     expect(node.hasAttribute("aria-busy")).toBe(false);
   });
 });
+
+describe("v-skeleton review fixes", () => {
+  it("leaves no skeleton attributes behind after SSR hydration once loading ends", async () => {
+    const { createSSRApp } = await import("vue");
+    const { renderToString } = await import("vue/server-renderer");
+    const loading = ref(true);
+    const make = () =>
+      createSSRApp({
+        render: () =>
+          withDirectives(h("article", { class: "card" }, [h("p", "Placeholder")]), [
+            [vSkeleton, { loading: loading.value, delay: 0, minDuration: 0 }],
+          ]),
+      });
+
+    const html = await renderToString(make());
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    make().mount(container);
+    warn.mockRestore();
+
+    loading.value = false;
+    await nextTick();
+    const article = container.querySelector("article")!;
+    for (const name of ["inert", "aria-hidden", "aria-busy", "data-allow-mismatch"]) {
+      expect(article.hasAttribute(name), name).toBe(false);
+    }
+    expect(article.className).toBe("card");
+  });
+
+  it("keeps the skeleton when Vue re-patches the element's class mid-load", async () => {
+    const active = ref(false);
+    const Comp = defineComponent({
+      render: () =>
+        withDirectives(h("section", { class: ["host", { active: active.value }] }, [h("p", "Ada")]), [
+          [vSkeleton, { loading: true, delay: 0 }],
+        ]),
+    });
+    const w = mount(Comp);
+
+    active.value = true;
+    await nextTick();
+
+    expect(el(w).classList).toContain("active");
+    expect(isSkeleton(el(w))).toBe(true);
+  });
+
+  it("restores the latest bound aria-hidden, not a stale one", async () => {
+    const hidden = ref("false");
+    const loading = ref(true);
+    const Comp = defineComponent({
+      render: () =>
+        withDirectives(h("section", { class: "host", "aria-hidden": hidden.value }, [h("p", "Ada")]), [
+          [vSkeleton, { loading: loading.value, delay: 0, minDuration: 0 }],
+        ]),
+    });
+    const w = mount(Comp);
+
+    hidden.value = "true";
+    await nextTick();
+    expect(el(w).getAttribute("aria-hidden")).toBe("true");
+    loading.value = false;
+    await nextTick();
+
+    expect(el(w).getAttribute("aria-hidden")).toBe("true");
+    hidden.value = "false";
+    await nextTick();
+    expect(el(w).getAttribute("aria-hidden")).toBe("false");
+  });
+});
