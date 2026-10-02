@@ -3,9 +3,9 @@
 import { computed, warn } from "vue";
 import { skeletonVariants } from "./variants";
 import type { SkeletonBaseProps, SkeletonVariantName } from "./types";
-import { generateAutoHighlight } from "./utils/color";
 import { shimmerPath } from "./utils/shimmer";
 import { useLoadingConfig } from "../../config";
+import { resolveSkeletonAppearance } from "../../skeletonize/appearance";
 const props = withDefaults(
   defineProps<
     SkeletonBaseProps & {
@@ -30,8 +30,7 @@ const props = withDefaults(
    default. They carry no withDefaults, so "not set" stays detectable. */
 const config = useLoadingConfig();
 const conf = () => config.skeleton ?? {};
-const animation = computed(() => props.animation ?? conf().animation ?? "shimmer");
-const speed = computed(() => props.speed ?? conf().speed ?? 1);
+const appearance = computed(() => resolveSkeletonAppearance(props, conf()));
 const angle = computed(() => props.angle ?? conf().angle ?? 90);
 const outlined = computed(() => props.outlined ?? conf().outlined);
 
@@ -57,36 +56,6 @@ const variantProps = computed(() => {
   const { variant, label, ...rest } = props;
   return rest;
 });
-const resolvedBase = computed(() => props.color ?? conf().color ?? "rgba(148, 163, 184, 0.22)");
-const resolvedHighlight = computed(() => {
-  const highlight = props.highlight ?? conf().highlight;
-  if (highlight) return highlight;
-
-  const auto = generateAutoHighlight(resolvedBase.value, {
-    lightThreshold: 0.8,
-    lightenBy: 0.5,
-    darkenBy: 0.22,
-    alphaBoost: 0.06,
-  });
-  return auto ?? "rgba(255, 255, 255, 0.35)";
-});
-
-const normalizedAnimation = computed(() => {
-  return animation.value === "wave" ? "shimmer" : animation.value;
-});
-
-const resolvedDuration = computed(() => {
-  const s = speed.value > 0 ? speed.value : 1;
-  const durations = {
-    shimmer: 1500,
-    pulse: 1500, // پالس کمی آرام‌تر حس بهتری می‌دهد
-    wave: 1400,
-    none: 0,
-  };
-  const baseMs = durations[normalizedAnimation.value as keyof typeof durations] ?? 0;
-  return baseMs === 0 ? "0ms" : `${Math.round(baseMs / s)}ms`;
-});
-
 /* Where the sheen's background-position slides from/to for this angle.
    See utils/shimmer.ts for why the endpoints are opposite corners. */
 const shimmer = computed(() => shimmerPath(angle.value));
@@ -107,14 +76,14 @@ const outlinedCfg = computed(() => {
   <div
     class="vslk-skeleton-container"
     :class="[
-      `vslk-sk--anim-${normalizedAnimation}`,
+      `vslk-sk--anim-${appearance.animation}`,
       `vslk-sk--v-${resolvedVariant}`,
       { 'vslk-sk--outlined': outlinedCfg.enabled },
     ]"
     :style="{
-      '--vslk-sk-base': resolvedBase,
-      '--vslk-sk-hi': resolvedHighlight,
-      '--vslk-sk-duration': resolvedDuration,
+      '--vslk-sk-base': appearance.base,
+      '--vslk-sk-hi': appearance.highlight,
+      '--vslk-sk-duration': appearance.duration,
       '--vslk-sk-outline-w': outlinedCfg.width,
       '--vslk-sk-outline-style': outlinedCfg.style,
       '--vslk-sk-w': typeof props.width === 'number' ? `${props.width}px` : props.width,
