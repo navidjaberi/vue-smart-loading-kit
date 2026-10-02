@@ -453,7 +453,7 @@ While skeletonized, the element is `inert` and `aria-hidden` (fake or stale cont
 * The last line of a wrapped paragraph gets a full-width bar, because CSS cannot know its real length.
 * A few characters on a colored shape (initials avatars, badges) look like a line of text to CSS and would get stripes. Mark them `data-skeleton="block"`.
 * `video`, `canvas` and `iframe` are hidden but keep their space. Wrap them in `data-skeleton="block"` for a solid block.
-* Direct text of an element that also contains a `data-skeleton="ignore"` child stays visible, because its color can't be hidden without also hiding the ignored text.
+* A text block taller than its text (table cells in rows of uneven height, or flex/grid items stretched to their neighbors) gets bars over its whole height, because CSS can't know how many lines the text really has. Mark such cells `data-skeleton="block"` if that matters.
 * Requires evergreen browsers from late 2023 on, for the `lh` unit, `:has()` and `mask-composite`.
 
 ---
