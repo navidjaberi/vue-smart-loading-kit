@@ -10,13 +10,15 @@ import {
   useDelayedLoading,
 } from "../utils/useDelayedLoading";
 import { useLoadingConfig } from "../config";
+import { vSkeleton } from "../skeletonize/directive";
 
 const props = withDefaults(
   defineProps<{
     loading: boolean;
     /** replace: swap the content for a skeleton.
-     *  overlay: keep the content (inert, dimmed) and center a spinner over it. */
-    mode?: "replace" | "overlay";
+     *  overlay: keep the content (inert, dimmed) and center a spinner over it.
+     *  skeletonize: keep the content and restyle it into a skeleton (v-skeleton). */
+    mode?: "replace" | "overlay" | "skeletonize";
     /** ms a load must last before the loader appears. */
     delay?: number;
     /** ms the loader stays up once shown. */
@@ -127,7 +129,26 @@ const spinnerProps = computed(() => ({
       <slot v-else />
     </template>
 
-    <template v-else>
+    <template v-else-if="mode === 'skeletonize'">
+      <slot v-if="view === 'error'" name="error" :error="props.error" :retry="retry">
+        <div class="vslk-smart-loader__error" role="alert">
+          <p>Something went wrong.</p>
+          <button type="button" @click="retry">Try again</button>
+        </div>
+      </slot>
+      <template v-else>
+        <!-- timing is already applied by `view`, hence delay/minDuration 0 -->
+        <div
+          class="vslk-smart-loader__content"
+          v-skeleton="{ loading: view === 'loader', delay: 0, minDuration: 0 }"
+        >
+          <slot />
+        </div>
+        <span v-if="view === 'loader' && props.label" class="vslk-sr-only" role="status">{{ props.label }}</span>
+      </template>
+    </template>
+
+    <template v-else-if="mode === 'overlay'">
       <div
         class="vslk-smart-loader__content"
         :class="{ 'vslk-smart-loader__content--busy': view !== 'content' }"
@@ -198,5 +219,16 @@ const spinnerProps = computed(() => ({
   .vslk-smart-loader__content {
     transition: none;
   }
+}
+
+.vslk-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

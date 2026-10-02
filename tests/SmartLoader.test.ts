@@ -245,3 +245,43 @@ describe("SmartLoader — layout shift (replace mode)", () => {
     expect((wrapper.element as HTMLElement).style.minHeight).toBe("");
   });
 });
+
+describe("SmartLoader — skeletonize mode", () => {
+  it("keeps the content and skeletonizes it while the loader would show", async () => {
+    const wrapper = mountLoader({ mode: "skeletonize", loading: true, delay: 200 });
+    const content = () => wrapper.find(".vslk-smart-loader__content");
+
+    expect(wrapper.find(".content").exists()).toBe(true);
+    expect(content().classes()).not.toContain("vslk-skeletonize");
+
+    vi.advanceTimersByTime(200);
+    await nextTick();
+    expect(content().classes()).toContain("vslk-skeletonize");
+    expect(content().attributes("inert")).toBeDefined();
+    expect(content().attributes("aria-hidden")).toBe("true");
+  });
+
+  it("announces the label in its own status element while skeletonized", () => {
+    const wrapper = mountLoader({ mode: "skeletonize", loading: true, delay: 0, label: "Loading users" });
+    const status = wrapper.find('.vslk-smart-loader > [role="status"]');
+
+    expect(status.text()).toBe("Loading users");
+  });
+
+  it("shows the error state instead of the content", () => {
+    const wrapper = mountLoader({ mode: "skeletonize", loading: false, error: true });
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true);
+    expect(wrapper.find(".content").exists()).toBe(false);
+  });
+
+  it("does not reserve height (nothing is replaced)", async () => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ height: 600 } as DOMRect);
+    const wrapper = mountLoader({ mode: "skeletonize", loading: false, delay: 0 });
+
+    await wrapper.setProps({ loading: true });
+
+    expect((wrapper.element as HTMLElement).style.minHeight).toBe("");
+    vi.restoreAllMocks();
+  });
+});

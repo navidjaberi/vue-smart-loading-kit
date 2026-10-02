@@ -15,7 +15,7 @@ export interface LoadingKitConfig {
     speed?: number;
   };
   smartLoader?: {
-    mode?: "replace" | "overlay";
+    mode?: "replace" | "overlay" | "skeletonize";
     delay?: number;
     minDuration?: number;
     preserveHeight?: boolean;
