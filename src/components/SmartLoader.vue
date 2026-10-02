@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import Skeleton from "./Skeleton/Skeleton.vue";
 import Spinner from "./Spinner/Spinner.vue";
 import type { SkeletonBaseProps, SkeletonVariantName } from "./Skeleton/types";
@@ -56,10 +56,25 @@ const emit = defineEmits<{
 /* The loader appears only after `delay` and stays for `minDuration`, but
    aria-busy (in the template) follows the real `loading` state, so
    assistive tech knows the region is updating while the loader waits. */
-const showLoader = useDelayedLoading(() => props.loading, {
-  delay: () => props.delay ?? conf().delay ?? DEFAULT_DELAY,
-  minDuration: () => props.minDuration ?? conf().minDuration ?? DEFAULT_MIN_DURATION,
-});
+const delay = computed(() => props.delay ?? conf().delay ?? DEFAULT_DELAY);
+const minDuration = computed(() => props.minDuration ?? conf().minDuration ?? DEFAULT_MIN_DURATION);
+const showLoader = useDelayedLoading(() => props.loading, { delay, minDuration });
+
+/* skeletonize mode: v-skeleton gets the real loading state and timing, so
+   its getSSRProps can skeletonize the server HTML (the delayed `view` never
+   reaches "loader" on the server). Content that only mounts once the loader
+   is due (after an error) is skeletonized at once: the wait already happened. */
+const skeletonizeValue = computed(() => ({
+  loading: props.loading,
+  delay: view.value === "loader" ? 0 : delay.value,
+  minDuration: minDuration.value,
+}));
+
+/* The label is announced only after mount: the server can't know whether
+   the loader is up, and inserting text into an existing live region is
+   what screen readers reliably announce. */
+const mounted = ref(false);
+onMounted(() => (mounted.value = true));
 
 /* What is on screen: a visible loader wins, then an error, then content.
    So during a retry the error stays up until the loader actually appears,
@@ -137,18 +152,17 @@ const spinnerProps = computed(() => ({
         </div>
       </slot>
       <template v-else>
-        <!-- timing is already applied by `view`, hence delay/minDuration 0 -->
-        <div
-          class="vslk-smart-loader__content"
-          v-skeleton="{ loading: view === 'loader', delay: 0, minDuration: 0 }"
-        >
+        <div class="vslk-smart-loader__content" v-skeleton="skeletonizeValue">
           <slot />
         </div>
-        <span v-if="view === 'loader' && props.label" class="vslk-sr-only" role="status">{{ props.label }}</span>
+        <span v-if="props.label" class="vslk-sr-only" role="status">{{
+          mounted && view === "loader" ? props.label : ""
+        }}</span>
       </template>
     </template>
 
-    <template v-else-if="mode === 'overlay'">
+    <!-- overlay, and any unknown mode (a typo shouldn't make content vanish) -->
+    <template v-else>
       <div
         class="vslk-smart-loader__content"
         :class="{ 'vslk-smart-loader__content--busy': view !== 'content' }"

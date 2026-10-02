@@ -81,4 +81,27 @@ describe("hydration", () => {
     expect(mismatches).toEqual([]);
     expect(container.querySelector(".vslk-skeletonize")).not.toBeNull();
   });
+
+  it("SmartLoader skeletonize mode with a label hydrates without a mismatch", async () => {
+    const props = { loading: true, mode: "skeletonize", delay: 0, label: "Loading users" } as const;
+    const app = () => createSSRApp({ render: () => h(SmartLoader, props, () => h("p", "Placeholder")) });
+
+    // a real server has no window: that is what decides SSR behavior
+    vi.stubGlobal("window", undefined);
+    const html = await renderToString(app());
+    vi.unstubAllGlobals();
+
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    app().mount(container);
+    await nextTick();
+    const messages = [...warn.mock.calls, ...error.mock.calls].map((c) => String(c[0]));
+    warn.mockRestore();
+    error.mockRestore();
+
+    expect(html).toContain("vslk-skeletonize");
+    expect(messages.filter((m) => /hydration/i.test(m))).toEqual([]);
+  });
 });

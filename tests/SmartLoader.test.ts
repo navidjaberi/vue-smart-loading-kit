@@ -261,8 +261,9 @@ describe("SmartLoader — skeletonize mode", () => {
     expect(content().attributes("aria-hidden")).toBe("true");
   });
 
-  it("announces the label in its own status element while skeletonized", () => {
+  it("announces the label in its own status element while skeletonized", async () => {
     const wrapper = mountLoader({ mode: "skeletonize", loading: true, delay: 0, label: "Loading users" });
+    await nextTick(); // filled in after mount (see the SSR hydration test)
     const status = wrapper.find('.vslk-smart-loader > [role="status"]');
 
     expect(status.text()).toBe("Loading users");
@@ -283,5 +284,13 @@ describe("SmartLoader — skeletonize mode", () => {
 
     expect((wrapper.element as HTMLElement).style.minHeight).toBe("");
     vi.restoreAllMocks();
+  });
+});
+
+describe("SmartLoader — unknown mode", () => {
+  it("falls back to overlay instead of rendering nothing", () => {
+    const wrapper = mountLoader({ mode: "bogus" as never, loading: false });
+
+    expect(wrapper.find(".content").exists()).toBe(true);
   });
 });

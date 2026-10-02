@@ -80,4 +80,12 @@ describe("SSR", () => {
     expect(html.includes('aria-busy="true"')).toBe(value.loading);
     expect(vi.getTimerCount()).toBe(0);
   });
+
+  it("SmartLoader skeletonize mode skeletonizes the server HTML with delay 0", async () => {
+    const html = await render(SmartLoader, { loading: true, mode: "skeletonize", delay: 0 }, "Placeholder");
+
+    expect(html).toMatch(/vslk-smart-loader__content[^>]*vslk-skeletonize|vslk-skeletonize[^>]*vslk-smart-loader__content/);
+    expect(html).toContain("Placeholder");
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
