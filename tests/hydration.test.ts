@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createSSRApp, h, nextTick, type Component } from "vue";
+import { createSSRApp, h, nextTick, withDirectives, type Component } from "vue";
 import { renderToString } from "vue/server-renderer";
-import { Spinner, ProgressBar, SmartLoader } from "../src/index";
+import { Spinner, ProgressBar, SmartLoader, vSkeleton } from "../src/index";
 
 /* Hydration: the first client render must produce exactly the HTML the
    server sent, or Vue reports a mismatch (and may patch or re-render).
@@ -66,5 +66,19 @@ describe("hydration", () => {
     const { mismatches } = await hydrate(SmartLoader, { loading: true });
 
     expect(mismatches).toEqual([]);
+  });
+
+  it("v-skeleton with placeholder data (delay 0) hydrates without a mismatch", async () => {
+    // a realistic element: its own class and style are what Vue compares during hydration
+    const Comp = {
+      render: () =>
+        withDirectives(h("article", { class: "card", style: { padding: "8px" } }, [h("p", "Placeholder")]), [
+          [vSkeleton, { loading: true, delay: 0 }],
+        ]),
+    };
+    const { container, mismatches } = await hydrate(Comp, {});
+
+    expect(mismatches).toEqual([]);
+    expect(container.querySelector(".vslk-skeletonize")).not.toBeNull();
   });
 });

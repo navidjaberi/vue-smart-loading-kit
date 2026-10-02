@@ -6,8 +6,11 @@ import Spinner from './components/Spinner/Spinner.vue'
 import SmartLoader from './components/SmartLoader.vue'
 import ProgressBar from './components/ProgressBar/ProgressBar.vue'
 import PageProgress from './components/PageProgress/PageProgress.vue'
+import { vSkeleton } from './skeletonize/directive'
 export { Skeleton, Spinner, SmartLoader, ProgressBar, PageProgress }
 export { usePageProgress } from './utils/pageProgress'
+export { vSkeleton } from './skeletonize/directive'
+export type { SkeletonDirectiveValue } from './skeletonize/directive'
 export type { PageProgress as PageProgressController, RouterLike } from './utils/pageProgress'
 export { useDelayedLoading } from './utils/useDelayedLoading'
 export { provideLoadingConfig, useLoadingConfig } from './config'
@@ -45,5 +48,6 @@ export default {
     app.component('SmartLoader', SmartLoader)
     app.component('ProgressBar', ProgressBar)
     app.component('PageProgress', PageProgress)
+    app.directive('skeleton', vSkeleton)
   }
 }

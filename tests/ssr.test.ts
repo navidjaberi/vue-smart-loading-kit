@@ -1,8 +1,8 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createSSRApp, h, type Component } from "vue";
+import { createSSRApp, h, withDirectives, type Component } from "vue";
 import { renderToString } from "vue/server-renderer";
-import VueSmartLoadingKit, { Skeleton, Spinner, ProgressBar, SmartLoader, PageProgress, usePageProgress } from "../src/index";
+import VueSmartLoadingKit, { Skeleton, Spinner, ProgressBar, SmartLoader, PageProgress, usePageProgress, vSkeleton } from "../src/index";
 import { skeletonVariants } from "../src/components/Skeleton/variants";
 
 /* Server-side rendering (Nuxt, vite-ssr, ...): no window, no document,
@@ -65,6 +65,19 @@ describe("SSR", () => {
     const html = await renderToString(app);
 
     expect(html).not.toContain("vslk-page-progress"); // the bar is client-only
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each([
+    [{ loading: true, delay: 0 }, true],
+    [{ loading: true, delay: 200 }, false],
+    [{ loading: false, delay: 0 }, false],
+  ])("v-skeleton %j renders the skeleton on the server: %s", async (value, skeletonized) => {
+    const app = createSSRApp({ render: () => withDirectives(h("div", "Ada"), [[vSkeleton, value]]) });
+    const html = await renderToString(app);
+
+    expect(html.includes("vslk-skeletonize")).toBe(skeletonized);
+    expect(html.includes('aria-busy="true"')).toBe(value.loading);
     expect(vi.getTimerCount()).toBe(0);
   });
 });
