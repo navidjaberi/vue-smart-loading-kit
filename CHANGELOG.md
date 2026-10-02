@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- `v-skeleton` finds the global and `provideLoadingConfig` config through
+  Vue's public API only, no longer through an internal field that a future
+  Vue release could remove.
+
 ### Documentation
 
 - A step-by-step `v-skeleton` guide in the demo and README: setup, placeholder

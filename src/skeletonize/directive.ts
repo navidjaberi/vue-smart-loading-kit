@@ -1,6 +1,6 @@
 import { effectScope, ref, watch, type DirectiveBinding, type EffectScope, type ObjectDirective, type Ref, type VNode } from "vue";
 import { DEFAULT_DELAY, DEFAULT_MIN_DURATION, useDelayedLoading } from "../utils/useDelayedLoading";
-import { LOADING_CONFIG, type LoadingKitConfig } from "../config";
+import { configForInstance, type LoadingKitConfig } from "../config";
 import { resolveSkeletonAppearance } from "./appearance";
 
 export type SkeletonDirectiveValue = boolean | { loading: boolean; delay?: number; minDuration?: number };
@@ -31,8 +31,7 @@ const states = new WeakMap<HTMLElement, State>();
 
 /** The config the directive's owning component sees (plugin or provideLoadingConfig). */
 function configOf(binding: DirectiveBinding): LoadingKitConfig {
-  const provides = (binding.instance?.$ as unknown as { provides?: Record<symbol, unknown> } | undefined)?.provides;
-  return (provides?.[LOADING_CONFIG as symbol] as LoadingKitConfig | undefined) ?? {};
+  return configForInstance(binding.instance?.$);
 }
 
 function resolve(value: SkeletonDirectiveValue, config: LoadingKitConfig): Resolved {

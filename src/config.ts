@@ -1,4 +1,4 @@
-import { inject, provide, type InjectionKey } from "vue";
+import { getCurrentInstance, inject, provide, type ComponentInternalInstance, type InjectionKey } from "vue";
 import type { SkeletonBaseProps, SkeletonVariantName } from "./components/Skeleton/types";
 import type { SpinnerProps } from "./components/Spinner/spinner.types";
 
@@ -56,5 +56,23 @@ export function useLoadingConfig(): LoadingKitConfig {
  * Call it in `setup`.
  */
 export function provideLoadingConfig(config: LoadingKitConfig): void {
-  provide(LOADING_CONFIG, mergeLoadingConfig(useLoadingConfig(), config));
+  const merged = mergeLoadingConfig(useLoadingConfig(), config);
+  provide(LOADING_CONFIG, merged);
+  const instance = getCurrentInstance();
+  if (instance) subtreeConfigs.set(instance, merged);
+}
+
+/* Directive hooks can't call inject(). So that v-skeleton sees the same
+   config as a component would, provideLoadingConfig() also records its
+   config per component, and configForInstance() finds the nearest one up
+   the parent chain, else the app's. Only Vue's public, typed API is used. */
+const subtreeConfigs = new WeakMap<ComponentInternalInstance, LoadingKitConfig>();
+
+/** The config in effect for a component, for code that can't call inject(). */
+export function configForInstance(instance: ComponentInternalInstance | null | undefined): LoadingKitConfig {
+  for (let i = instance; i; i = i.parent) {
+    const config = subtreeConfigs.get(i);
+    if (config) return config;
+  }
+  return (instance?.appContext.provides[LOADING_CONFIG as symbol] as LoadingKitConfig | undefined) ?? {};
 }

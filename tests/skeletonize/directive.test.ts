@@ -319,3 +319,60 @@ describe("v-skeleton getSSRProps", () => {
     expect(ssr(false)).toEqual({});
   });
 });
+
+describe("v-skeleton config lookup (public Vue API only)", () => {
+  const section = (value: SkeletonDirectiveValue) =>
+    defineComponent({
+      render: () => withDirectives(h("section", { class: "host" }, [h("p", "Ada")]), [[vSkeleton, value]]),
+    });
+  const withConfig = (config: Parameters<typeof provideLoadingConfig>[0], child: ReturnType<typeof defineComponent>) =>
+    defineComponent({
+      setup() {
+        provideLoadingConfig(config);
+        return () => h(child);
+      },
+    });
+
+  it("uses the nearest provideLoadingConfig, merged with the ones above it and the app's", () => {
+    const tree = withConfig(
+      { skeleton: { color: "#111111", animation: "pulse" } },
+      withConfig({ skeleton: { color: "#222222" } }, section({ loading: true, delay: 0 }))
+    );
+    const w = mount(tree, { global: { plugins: [[VueSmartLoadingKit, { skeleton: { speed: 2 } }]] } });
+
+    expect(el(w).style.getPropertyValue("--vslk-sk-base")).toBe("#222222");
+    expect(el(w).classList).toContain("vslk-skeletonize--pulse");
+    expect(el(w).style.getPropertyValue("--vslk-sk-duration")).toBe("750ms");
+  });
+
+  it("sees provideLoadingConfig called by the component that owns the directive", () => {
+    const Comp = defineComponent({
+      setup() {
+        provideLoadingConfig({ skeleton: { color: "#333333" } });
+        return () =>
+          withDirectives(h("section", { class: "host" }, [h("p", "Ada")]), [[vSkeleton, { loading: true, delay: 0 }]]);
+      },
+    });
+
+    expect(el(mount(Comp)).style.getPropertyValue("--vslk-sk-base")).toBe("#333333");
+  });
+
+  it("falls back to the built-in look with no plugin and no provider", () => {
+    const w = mount(section({ loading: true, delay: 0 }));
+
+    expect(el(w).style.getPropertyValue("--vslk-sk-base")).toBe("rgba(148, 163, 184, 0.22)");
+    expect(el(w).classList).toContain("vslk-skeletonize--shimmer");
+  });
+
+  it("applies the config in server-rendered HTML too", async () => {
+    const { createSSRApp } = await import("vue");
+    const { renderToString } = await import("vue/server-renderer");
+    const app = createSSRApp(withConfig({ skeleton: { animation: "pulse" } }, section({ loading: true, delay: 0 })));
+    app.use(VueSmartLoadingKit, { skeleton: { color: "#444444" } });
+
+    const html = await renderToString(app);
+
+    expect(html).toContain("vslk-skeletonize--pulse");
+    expect(html).toContain("--vslk-sk-base:#444444");
+  });
+});
