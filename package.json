@@ -1,6 +1,6 @@
 {
   "name": "vue-smart-loading-kit",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Smart loading states for Vue 3: skeletons, spinners, progress bars, a page progress bar and a loader that never flashes",
   "type": "module",
   "main": "./dist/vue-smart-loading-kit.umd.cjs",
