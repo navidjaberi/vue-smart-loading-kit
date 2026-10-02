@@ -13,4 +13,7 @@ export const FIXTURE = `
   <p class="ignored" data-skeleton="ignore">Always visible</p>
   <div class="chart" data-skeleton="block" style="height:60px"><span class="chart-label">Chart</span></div>
   <div class="mixed" data-skeleton="text">Mixed <b>content</b> here</div>
+  <div class="mixed-auto">Total: <b class="mixed-b">$12</b> per month</div>
+  <div class="bordered" style="border:2px solid;padding:4px">Box with a currentColor border</div>
+  <hr class="divider">
 </article>`;

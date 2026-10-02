@@ -25,12 +25,11 @@
 }
 
 /* 1. Hide all text. Layout, borders and container backgrounds stay.
-   color is inherited, so ancestors of an ignored element keep theirs
-   (otherwise the ignored text would inherit transparent and vanish);
-   every other descendant is still hidden on its own. */
-:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *, :has([data-skeleton="ignore"])) {
-  color: transparent !important;
+   -webkit-text-fill-color (not `color`) paints the glyphs, so currentColor,
+   and every border, divider or icon that uses it, keeps its real color. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *) {
   -webkit-text-fill-color: transparent !important;
+  text-decoration-color: transparent !important;
   text-shadow: none !important;
   caret-color: transparent !important;
   user-select: none !important;
@@ -38,17 +37,27 @@
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *)::placeholder {
   color: transparent !important;
 }
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *)::marker {
+  color: transparent !important;
+}
+/* text-fill-color is inherited: give ignored subtrees their glyphs back */
+:is(.vslk-skeletonize, .vslk-skeletonize *)[data-skeleton="ignore"] {
+  -webkit-text-fill-color: currentcolor;
+}
 
 /* 2. Line bars. A "text block" is a text element with no media, controls,
-   lists, tables, divs or other text blocks inside. A "leaf" is any other
-   element with only text, outside text blocks (so <strong> in <p> gets no
-   second bar). data-skeleton="text" forces bars.
+   lists, tables, divs or other text blocks inside, or a div/span holding
+   only phrasing elements (so "Total: <b>$12</b> per month" is barred as one
+   text, not just the <b>). A "leaf" is any other element with only text,
+   outside text blocks (so <strong> in <p> gets no second bar).
+   data-skeleton="text" forces bars.
    The mask has three layers: line stripes in the content box, plus the
    border ring (border-box XOR padding-box), so element borders (table
    grid lines) stay visible. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *, [data-skeleton="block"] *):is(
     :is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend):not(:has(img, svg, video, canvas, iframe, button, input, select, textarea, table, ul, ol, div, p, h1, h2, h3, h4, h5, h6, li, blockquote, [data-skeleton])),
-    :not(:has(*)):not(:empty):not(img, svg, video, canvas, iframe, button, input, select, textarea, br, hr, [data-skeleton]):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"]) *),
+    :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"]) *):not(:is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])) *),
+    :not(:has(*)):not(:empty):not(img, svg, video, canvas, iframe, button, input, select, textarea, br, hr, [data-skeleton]):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"], :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton]))) *),
     [data-skeleton="text"]
   ) {
   background-color: var(--vslk-sk-base);

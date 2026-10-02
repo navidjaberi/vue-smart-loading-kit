@@ -47,12 +47,28 @@ describe("skeletonize (real browser)", () => {
     expect(rects()).toEqual(before);
   });
 
+  // text is hidden with -webkit-text-fill-color, which leaves `color` (and so
+  // every currentColor border or divider) alone
   it("hides every text except under data-skeleton=ignore", async () => {
     await skeletonize();
-    for (const sel of [".name", ".role", ".title", ".para", ".inline", ".link", ".item", ".cell", ".label", ".button", ".mixed"]) {
-      expect(css(sel).color, sel).toBe(TRANSPARENT);
+    for (const sel of [".name", ".role", ".title", ".para", ".inline", ".link", ".item", ".cell", ".label", ".button", ".mixed", ".mixed-auto"]) {
+      expect(css(sel).webkitTextFillColor, sel).toBe(TRANSPARENT);
     }
-    expect(css(".ignored").color).not.toBe(TRANSPARENT);
+    expect(css(".ignored").webkitTextFillColor).not.toBe(TRANSPARENT);
+  });
+
+  it("keeps currentColor borders and dividers visible", async () => {
+    const before = { box: css(".bordered").borderTopColor, hr: css(".divider").borderTopColor };
+    await skeletonize();
+    expect(css(".bordered").borderTopColor).toBe(before.box);
+    expect(css(".divider").borderTopColor).toBe(before.hr);
+    expect(css(".bordered").borderTopColor).not.toBe(TRANSPARENT);
+  });
+
+  it("bars a div whose text is mixed with inline elements as one text block", async () => {
+    await skeletonize();
+    expect(css(".mixed-auto").maskImage).toContain("repeating-linear-gradient");
+    expect(css(".mixed-b").maskImage).toBe("none");
   });
 
   it("draws line bars on text blocks and text-only elements", async () => {
