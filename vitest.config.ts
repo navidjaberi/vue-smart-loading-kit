@@ -12,7 +12,7 @@ export default defineConfig({
       exclude: ['src/**/*.d.ts', 'src/**/types.ts', 'src/**/*.types.ts'],
       reporter: ['text-summary', 'json-summary', 'html'],
       // A little under the current numbers: CI fails if coverage drops.
-      thresholds: { statements: 95, branches: 90, functions: 95, lines: 97 },
+      thresholds: { statements: 98, branches: 95, functions: 98, lines: 99 },
     },
     projects: [
       {

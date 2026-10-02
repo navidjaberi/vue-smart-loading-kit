@@ -12,11 +12,13 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # Let a running mutation test finish (and save its cache) instead of cancelling it
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,6 +31,16 @@ jobs:
       - run: npm run test:coverage
       - run: node scripts/coverage-badge.mjs
       - run: cp -r coverage playground/dist/coverage
+      # Mutation report and badge under /mutation/. Incremental: only mutants
+      # touched by changed code or tests rerun; the rest comes from the cache.
+      - uses: actions/cache@v4
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-${{ github.sha }}
+          restore-keys: stryker-
+      - run: npm run test:mutation -- --concurrency 4
+      - run: node scripts/mutation-badge.mjs
+      - run: cp -r reports/mutation playground/dist/mutation
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

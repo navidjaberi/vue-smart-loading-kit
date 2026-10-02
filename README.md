@@ -8,6 +8,7 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 [![npm downloads](https://img.shields.io/npm/dm/vue-smart-loading-kit)](https://www.npmjs.com/package/vue-smart-loading-kit)
 [![CI](https://github.com/navidjaberi/vue-smart-loading-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/navidjaberi/vue-smart-loading-kit/actions/workflows/ci.yml)
 [![coverage](https://img.shields.io/endpoint?url=https://navidjaberi.github.io/vue-smart-loading-kit/coverage/badge.json)](https://navidjaberi.github.io/vue-smart-loading-kit/coverage/)
+[![mutation score](https://img.shields.io/endpoint?url=https://navidjaberi.github.io/vue-smart-loading-kit/mutation/badge.json)](https://navidjaberi.github.io/vue-smart-loading-kit/mutation/)
 [![license](https://img.shields.io/npm/l/vue-smart-loading-kit)](https://github.com/navidjaberi/vue-smart-loading-kit/blob/main/LICENSE)
 
 **[▶ Live demo](https://navidjaberi.github.io/vue-smart-loading-kit/)**: every component with live controls and copyable code.
@@ -644,7 +645,11 @@ npm run build
 
 # 🧪 Testing
 
-**1,369 unit tests and 11 real-browser tests**, run on Node 20 and 22 for every push and pull request. Coverage is **99% of lines** (93% of branches), and CI fails if it drops below the thresholds in `vitest.config.ts`. The [coverage report](https://navidjaberi.github.io/vue-smart-loading-kit/coverage/) is published with the demo.
+**1,400+ unit tests and 11 real-browser tests**, run on Node 20 and 22 for every push and pull request. Coverage is **100% of lines** (96% of branches), and CI fails if it drops below the thresholds in `vitest.config.ts`.
+
+Coverage only shows that code *ran*. **Mutation testing** ([Stryker](https://stryker-mutator.io/)) shows the tests would *catch a bug*: it plants small bugs in the source (flips a condition, changes a default, drops a call) and reruns the tests against each one. The **mutation score is 92%**: 92% of those planted bugs make a test fail. The surviving gaps it found led to new tests and two real bug fixes.
+
+Both reports are published with the demo: [coverage](https://navidjaberi.github.io/vue-smart-loading-kit/coverage/) and [mutation](https://navidjaberi.github.io/vue-smart-loading-kit/mutation/).
 
 Loading UI fails in ways a plain "does it render" test misses: a spinner that flickers, a skeleton that shifts the layout, a hydration mismatch. The suite targets those directly:
 
@@ -656,13 +661,15 @@ Loading UI fails in ways a plain "does it render" test misses: a spinner that fl
 | **SSR and hydration** | Server rendering works without a DOM, and the client hydrates the server HTML without a mismatch | `tests/ssr.test.ts`, `tests/hydration.test.ts` |
 | **Geometry** | The shimmer covers the shape cleanly at all 360 angles, with no hard edges | `tests/Skeleton/shimmer.test.ts` |
 | **Invariants** | No color literals in spinner styles, every spinner is `size` x `size`, every global style is `vslk-` prefixed, no stray HTML attributes | `tests/Spinner/consistency.test.ts`, `tests/css-isolation.test.ts` |
+| **Mutation testing** (Stryker) | Every planted bug is caught by some test; survivors point at missing assertions | `stryker.config.json` |
 | **Config precedence** | An explicit prop (even `false`) beats the global config, which beats the built-in default | `tests/config.test.ts` |
 
-Bug fixes start with a failing test, and key tests were checked by breaking the code on purpose (mutation testing) to make sure they catch the bug they guard against.
+Bug fixes start with a failing test.
 
 ```bash
 npm test               # unit tests
 npm run test:coverage  # unit tests with coverage and thresholds
+npm run test:mutation  # mutation testing with Stryker (incremental after the first run)
 npm run test:browser   # real-browser tests (run `npx playwright install chromium` once)
 npm run typecheck      # vue-tsc over src and tests
 ```

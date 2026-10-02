@@ -28,5 +28,11 @@
   ],
   "ignorers": [
     "vue-macros"
-  ]
+  ],
+  "incremental": true,
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": null
+  }
 }
