@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-10-12
+
 ### Fixed
 
 - `v-skeleton` hides SVG icons drawn from a `<use>` sprite, and paths with an
@@ -143,7 +145,8 @@ All notable changes to this project are documented here. The format follows
 
 - Initial release: `Skeleton` (13 variants) and `Spinner` (8 variants).
 
-[Unreleased]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.3...HEAD
+[Unreleased]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.0...v0.3.1
