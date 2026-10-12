@@ -84,9 +84,11 @@
   animation: var(--vslk-skz-anim) !important;
   object-position: -99999px 0 !important;
 }
+/* The icon's own drawing is hidden, not recolored: a <use> sprite draws in a
+   shadow tree that selectors can't reach, and an inline `fill: … !important`
+   beats any stylesheet. visibility is inherited into the shadow tree. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(svg) * {
-  fill: transparent !important;
-  stroke: transparent !important;
+  visibility: hidden !important;
 }
 
 /* 4. Controls become solid blocks of the same shape; their insides vanish. */

@@ -16,4 +16,6 @@ export const FIXTURE = `
   <div class="mixed-auto">Total: <b class="mixed-b">$12</b> per month</div>
   <div class="bordered" style="border:2px solid;padding:4px">Box with a currentColor border</div>
   <hr class="divider">
+  <svg style="display:none"><symbol id="vslk-test-icon" viewBox="0 0 24 24"><path fill="#e11d48" d="M2 2h20v20H2z"/></symbol></svg>
+  <p class="icons"><svg class="sprite" width="24" height="24"><use class="sprite-use" href="#vslk-test-icon"/></svg><svg class="hard" width="24" height="24"><path class="hard-path" style="fill:#e11d48 !important" d="M2 2h20v20H2z"/></svg></p>
 </article>`;

@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `v-skeleton` hides SVG icons drawn from a `<use>` sprite, and paths with an
+  inline `fill: … !important`. Both stayed visible over the skeleton.
+
 ## [0.3.3] - 2026-10-12
 
 ### Documentation

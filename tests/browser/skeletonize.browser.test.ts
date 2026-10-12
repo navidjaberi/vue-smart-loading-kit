@@ -98,6 +98,16 @@ describe("skeletonize (real browser)", () => {
     expect(css(".avatar").objectPosition).toContain("-99999px");
   });
 
+  // A <use> sprite draws in a shadow tree that selectors can't reach, and an
+  // inline !important fill beats any stylesheet: hide the insides instead.
+  it("hides icon content, even <use> sprites and inline !important fills", async () => {
+    await skeletonize();
+    expect(css(".sprite-use").visibility).toBe("hidden");
+    expect(css(".hard-path").visibility).toBe("hidden");
+    expect(css(".sprite").visibility).toBe("visible");
+    expect(css(".sprite").backgroundColor).not.toBe(TRANSPARENT);
+  });
+
   it("turns data-skeleton=block into one solid block", async () => {
     await skeletonize();
     expect(css(".chart").backgroundColor).not.toBe(TRANSPARENT);
