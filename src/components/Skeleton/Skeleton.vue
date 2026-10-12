@@ -169,8 +169,6 @@ const outlinedCfg = computed(() => {
   0% { background-position: var(--vslk-sk-shimmer-from, 100% 50%); }
   100% { background-position: var(--vslk-sk-shimmer-to, 0% 50%); }
 }
-
-/* Pulse - بجای opacity از رنگ استفاده می‌کنیم تا در رنگ‌های روشن هم کار کند */
 .vslk-sk--anim-pulse .vslk-sk-shape {
   animation: vslk-pulse var(--vslk-sk-duration) infinite ease-in-out;
 }
