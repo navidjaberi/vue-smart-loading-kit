@@ -1,8 +1,10 @@
 # Vue Smart Loading Kit
 
-A smart, lightweight, and customizable loading UI library for **Vue 3**.
+Turn your real Vue components into their own skeleton with one directive, plus spinners, progress bars and a loader that never flashes.
 
-`vue-smart-loading-kit` provides ready-to-use **Skeleton**, **Spinner** and **ProgressBar** components, plus **SmartLoader** and **PageProgress**, which decide *when* a loader is worth showing so fast loads never flash. Everything is designed to make loading states simple, consistent, and easy to customize.
+```vue
+<UserCard v-skeleton="loading" :user="user" />
+```
 
 [![npm version](https://img.shields.io/npm/v/vue-smart-loading-kit)](https://www.npmjs.com/package/vue-smart-loading-kit)
 [![npm downloads](https://img.shields.io/npm/dm/vue-smart-loading-kit)](https://www.npmjs.com/package/vue-smart-loading-kit)
@@ -11,7 +13,17 @@ A smart, lightweight, and customizable loading UI library for **Vue 3**.
 [![mutation score](https://img.shields.io/endpoint?url=https://navidjaberi.github.io/vue-smart-loading-kit/mutation/badge.json)](https://navidjaberi.github.io/vue-smart-loading-kit/mutation/)
 [![license](https://img.shields.io/npm/l/vue-smart-loading-kit)](https://github.com/navidjaberi/vue-smart-loading-kit/blob/main/LICENSE)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/navidjaberi/vue-smart-loading-kit/main/docs/v-skeleton.gif" alt="Two user cards switching between their real content and their own skeleton, without moving" width="652">
+</p>
+
 **[▶ Live demo](https://navidjaberi.github.io/vue-smart-loading-kit/)**: every component with live controls and copyable code.
+
+## Why this kit
+
+* **`v-skeleton` turns your real component into its skeleton.** There is no second, hand-built placeholder to keep in sync. It's CSS only, with no build step, no measuring and no DOM changes, so nothing on the page moves and it works with SSR.
+* **Loaders that never flash.** `SmartLoader` waits 200ms before showing anything, then keeps the loader for at least 500ms. Error state and retry are built in.
+* **A replacement for NProgress.** `PageProgress` follows vue-router and your own requests, and counts loads that run in parallel.
 
 ---
 

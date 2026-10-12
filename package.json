@@ -1,7 +1,7 @@
 {
   "name": "vue-smart-loading-kit",
   "version": "0.3.2",
-  "description": "Smart loading states for Vue 3: skeletons, spinners, progress bars, a page progress bar and a loader that never flashes",
+  "description": "Turn your real Vue components into their own skeleton with one directive, plus spinners, progress bars and a loader that never flashes",
   "type": "module",
   "main": "./dist/vue-smart-loading-kit.umd.cjs",
   "module": "./dist/vue-smart-loading-kit.js",
@@ -41,7 +41,9 @@
     "progress-bar",
     "nprogress",
     "nuxt",
-    "ui"
+    "ui",
+    "skeletonize",
+    "directive"
   ],
   "author": "Navid Jaberi",
   "license": "MIT",
@@ -78,5 +80,5 @@
   "bugs": {
     "url": "https://github.com/navidjaberi/vue-smart-loading-kit/issues"
   },
-  "homepage": "https://github.com/navidjaberi/vue-smart-loading-kit#readme"
+  "homepage": "https://navidjaberi.github.io/vue-smart-loading-kit/"
 }
