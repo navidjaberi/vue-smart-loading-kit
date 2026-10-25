@@ -1,10 +1,13 @@
 import { computed, inject, ref, warn, type ComputedRef, type InjectionKey } from "vue";
 
-/** The three router methods used, so vue-router is not a dependency. */
+/** The three router methods used, so vue-router is not a dependency.
+ *  The callbacks take no arguments and return void, which is what lets a
+ *  real vue-router Router (whose guards return NavigationGuardReturn) be
+ *  passed here without a type error. */
 export interface RouterLike {
-  beforeEach(guard: (...args: never[]) => unknown): () => void;
-  afterEach(hook: (...args: never[]) => unknown): () => void;
-  onError(handler: (...args: never[]) => unknown): () => void;
+  beforeEach(guard: () => void): () => void;
+  afterEach(hook: () => void): () => void;
+  onError(handler: () => void): () => void;
 }
 
 export interface PageProgress {

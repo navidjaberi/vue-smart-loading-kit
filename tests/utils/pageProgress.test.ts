@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createPageProgress, bindRouter, type RouterLike } from "../../src/utils/pageProgress";
 
 /** A minimal stand-in for vue-router: records hooks so tests can fire them. */
@@ -96,5 +96,37 @@ describe("bindRouter", () => {
 
     p.done();
     expect(p.loading.value).toBe(false);
+  });
+});
+
+describe("bindRouter with a real vue-router", () => {
+  // Also a type test: passing a real Router must compile (see RouterLike).
+  it("is busy during a navigation and idle once it lands", async () => {
+    const { createRouter, createMemoryHistory } = await import("vue-router");
+    let release: (() => void) | undefined;
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: "/", component: { render: () => null } },
+        {
+          path: "/slow",
+          component: { render: () => null },
+          beforeEnter: () => new Promise<void>((resolve) => (release = resolve)),
+        },
+      ],
+    });
+    const progress = createPageProgress();
+    bindRouter(progress, router);
+    await router.push("/");
+    expect(progress.loading.value).toBe(false);
+
+    const navigation = router.push("/slow");
+    // the route's own guard is pending, so the global beforeEach already ran
+    await vi.waitFor(() => expect(release).toBeDefined());
+    expect(progress.loading.value).toBe(true);
+
+    release!();
+    await navigation;
+    expect(progress.loading.value).toBe(false);
   });
 });
