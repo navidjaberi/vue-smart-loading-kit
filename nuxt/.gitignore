@@ -4,4 +4,3 @@ dist
 .output
 .data
 *.tgz
-package-lock.json
