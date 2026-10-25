@@ -1,6 +1,6 @@
 {
   "name": "vue-smart-loading-kit",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "Turn your real Vue components into their own skeleton with one directive, plus spinners, progress bars and a loader that never flashes",
   "type": "module",
   "main": "./dist/vue-smart-loading-kit.umd.cjs",
