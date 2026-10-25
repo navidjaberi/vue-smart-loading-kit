@@ -29,3 +29,29 @@ jobs:
       - run: npm run test:browser
       - run: npm run build
       - run: npm run build:playground
+
+  nuxt:
+    name: Nuxt module
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Test the module against the kit in this same commit, not the one on npm
+      - run: npm ci && npm run build && npm pack --pack-destination nuxt
+      - working-directory: nuxt
+        run: |
+          npm pkg set dependencies.vue-smart-loading-kit="file:./$(ls vue-smart-loading-kit-*.tgz)"
+          npm install
+      - working-directory: nuxt
+        run: npm run dev:prepare
+      - working-directory: nuxt
+        run: npm run test:types
+      - working-directory: nuxt
+        run: npx playwright-core install --with-deps chromium
+      - working-directory: nuxt
+        run: npm test
+      - working-directory: nuxt
+        run: npx nuxt-module-build build

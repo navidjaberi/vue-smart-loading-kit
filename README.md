@@ -117,7 +117,15 @@ After global registration, the components can be used directly:
 
 ### Nuxt
 
-Register the plugin in a Nuxt plugin. Everything is SSR-safe:
+Use the Nuxt module. It registers `v-skeleton`, auto-imports the components and composables, connects `<PageProgress>` to the router and adds the CSS:
+
+```bash
+npx nuxi module add nuxt-smart-loading-kit
+```
+
+Options and examples: [nuxt-smart-loading-kit](./nuxt#readme).
+
+Without the module, register the plugin in a Nuxt plugin. Everything is SSR-safe:
 
 ```ts
 // plugins/loading-kit.ts
