@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `components: false` plugin option: provides the config, the page progress
+  and `v-skeleton` without registering the components globally. Used by the
+  new Nuxt module, [nuxt-smart-loading-kit](./nuxt), which auto-imports them.
+
+### Fixed
+
+- Passing a real vue-router to the plugin (`{ router: useRouter() }`) no
+  longer fails type-checking. `RouterLike` now accepts vue-router's `Router`.
+
 ## [0.3.4] - 2026-10-12
 
 ### Fixed
