@@ -6,11 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-25
+
 ### Added
 
+- Nuxt module, [nuxt-smart-loading-kit](https://github.com/navidjaberi/vue-smart-loading-kit/tree/main/nuxt#readme):
+  one line in `nuxt.config` registers `v-skeleton`, auto-imports the
+  components and composables, connects `<PageProgress>` to the router and
+  adds the CSS. Published as its own package.
 - `components: false` plugin option: provides the config, the page progress
-  and `v-skeleton` without registering the components globally. Used by the
-  new Nuxt module, [nuxt-smart-loading-kit](./nuxt), which auto-imports them.
+  and `v-skeleton` without registering the components globally. The Nuxt
+  module uses it so that only the components a page uses reach its bundle.
 
 ### Fixed
 
@@ -156,7 +162,8 @@ All notable changes to this project are documented here. The format follows
 
 - Initial release: `Skeleton` (13 variants) and `Spinner` (8 variants).
 
-[Unreleased]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.4...HEAD
+[Unreleased]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.4...v0.4.0
 [0.3.4]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.1...v0.3.2
