@@ -19,6 +19,8 @@ Turn your real Vue components into their own skeleton with one directive, plus s
 
 **[▶ Live demo](https://navidjaberi.github.io/vue-smart-loading-kit/)**: every component with live controls and copyable code.
 
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/navidjaberi/vue-smart-loading-kit/tree/main/examples/stackblitz?file=src%2FApp.vue): edit a small app that uses the kit, in your browser.
+
 ## Why this kit
 
 * **`v-skeleton` turns your real component into its skeleton.** There is no second, hand-built placeholder to keep in sync. It's CSS only, with no build step, no measuring and no DOM changes, so nothing on the page moves and it works with SSR.
