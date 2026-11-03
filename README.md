@@ -551,11 +551,10 @@ While skeletonized, the element is `inert` and `aria-hidden` (fake or stale cont
 
 ## Limitations
 
-* The last line of a wrapped paragraph gets a full-width bar, because CSS cannot know its real length.
-* A few characters on a colored shape (initials avatars, badges) look like a line of text to CSS and would get stripes. Mark them `data-skeleton="block"`.
+* A few characters on a colored shape (initials avatars, badges) get a short bar on top of the shape. Mark them `data-skeleton="block"` to turn the whole shape into one block.
 * `video`, `canvas` and `iframe` are hidden but keep their space. Wrap them in `data-skeleton="block"` for a solid block.
-* A text block taller than its text (table cells in rows of uneven height, or flex/grid items stretched to their neighbors) gets bars over its whole height, because CSS can't know how many lines the text really has. Mark such cells `data-skeleton="block"` if that matters.
-* Requires evergreen browsers from late 2023 on, for the `lh` unit, `:has()` and `mask-composite`.
+* An icon is recognized as an empty `<i>` or an empty element with `icon` in its class (Material Design Icons, Font Awesome, Iconify, Nuxt UI). Any other empty element drawing an icon with `::before` keeps its space but shows nothing; mark it `data-skeleton="block"`.
+* Requires evergreen browsers from late 2023 on, for `:has()`. The pulse animation of the text bars also needs `@property` (Firefox 128+); older browsers show those bars without the pulse.
 
 ---
 
