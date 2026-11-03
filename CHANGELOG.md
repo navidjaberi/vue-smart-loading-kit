@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- With the shimmer animation, `v-skeleton` text bars were lighter than
+  blocks (images, buttons) and than `<Skeleton>`, since 0.5.0. They are the
+  same shade again.
+
 ## [0.5.0] - 2026-11-03
 
 ### Changed

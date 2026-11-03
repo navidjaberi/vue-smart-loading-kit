@@ -82,6 +82,16 @@ describe("skeletonize (real browser)", () => {
     }
   });
 
+  // blocks paint the shimmer gradient over their base color, so a translucent
+  // base shows twice there: text bars get that same shade to match
+  it("gives text bars the same shade as blocks", async () => {
+    await skeletonize();
+    const alpha = (c: string) => Number(c.match(/[\d.]+(?=\)$)/)?.[0] ?? 1);
+    const base = q(".scope").style.getPropertyValue("--vslk-sk-base");
+    const a = alpha(base);
+    expect(alpha(css(".title").textDecorationColor)).toBeCloseTo(1 - (1 - a) ** 2, 2);
+  });
+
   it("paints no box behind a text block", async () => {
     const before = css(".title").backgroundColor;
     await skeletonize();

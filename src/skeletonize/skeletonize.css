@@ -24,16 +24,26 @@
   --vslk-skz-mask: linear-gradient(90deg, #000 40%, rgb(0 0 0 / 0.45) 50%, #000 60%);
   --vslk-skz-text-anim: vslk-skz-shimmer-mask var(--vslk-sk-duration, 1500ms) linear infinite;
 }
+/* With shimmer, blocks paint the gradient over their base color, so a
+   translucent base shows twice. Text bars have a single layer: give them
+   that same doubled shade, so text and blocks match (as in <Skeleton>). */
+@supports (color: rgb(from red r g b / alpha)) {
+  .vslk-skeletonize {
+    --vslk-skz-text: rgb(from var(--vslk-sk-base) r g b / calc(1 - (1 - alpha) * (1 - alpha)));
+  }
+}
 .vslk-skeletonize.vslk-skeletonize--pulse {
   --vslk-skz-image: none;
   --vslk-skz-anim: vslk-skz-pulse var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
   --vslk-skz-mask: none;
+  --vslk-skz-text: var(--vslk-sk-base);
   --vslk-skz-text-anim: vslk-skz-pulse-text var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
 }
 .vslk-skeletonize.vslk-skeletonize--none {
   --vslk-skz-image: none;
   --vslk-skz-anim: none;
   --vslk-skz-mask: none;
+  --vslk-skz-text: var(--vslk-sk-base);
   --vslk-skz-text-anim: none;
 }
 
@@ -75,7 +85,7 @@
     :not(:has(*)):not(:empty):not(img, svg, video, canvas, iframe, button, input, select, textarea, br, hr, [data-skeleton]):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"], :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton]))) *),
     [data-skeleton="text"]
   ) {
-  --vslk-skz-color: var(--vslk-sk-base);
+  --vslk-skz-color: var(--vslk-skz-text, var(--vslk-sk-base));
   text-decoration: underline solid !important;
   text-decoration-color: var(--vslk-skz-color) !important;
   text-decoration-thickness: 0.9em !important;
