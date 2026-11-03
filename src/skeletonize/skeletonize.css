@@ -10,18 +10,31 @@
    never show. Animations do override normal page styles, so the bars
    still win while animating. */
 
-/* Animation, chosen on the root and read by every painted part. */
+/* Animation, chosen on the root and read by every painted part. Blocks
+   animate their background; line bars are a text decoration, so they
+   shimmer through a moving mask and pulse through --vslk-skz-color. */
+@property --vslk-skz-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
 .vslk-skeletonize {
   --vslk-skz-image: linear-gradient(90deg, var(--vslk-sk-base) 40%, var(--vslk-sk-hi) 50%, var(--vslk-sk-base) 60%);
   --vslk-skz-anim: vslk-skz-shimmer var(--vslk-sk-duration, 1500ms) linear infinite;
+  --vslk-skz-mask: linear-gradient(90deg, #000 40%, rgb(0 0 0 / 0.45) 50%, #000 60%);
+  --vslk-skz-text-anim: vslk-skz-shimmer-mask var(--vslk-sk-duration, 1500ms) linear infinite;
 }
 .vslk-skeletonize.vslk-skeletonize--pulse {
   --vslk-skz-image: none;
   --vslk-skz-anim: vslk-skz-pulse var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
+  --vslk-skz-mask: none;
+  --vslk-skz-text-anim: vslk-skz-pulse-text var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
 }
 .vslk-skeletonize.vslk-skeletonize--none {
   --vslk-skz-image: none;
   --vslk-skz-anim: none;
+  --vslk-skz-mask: none;
+  --vslk-skz-text-anim: none;
 }
 
 /* 1. Hide all text. Layout, borders and container backgrounds stay.
@@ -51,29 +64,27 @@
    text, not just the <b>). A "leaf" is any other element with only text,
    outside text blocks (so <strong> in <p> gets no second bar).
    data-skeleton="text" forces bars.
-   The mask has three layers: line stripes in the content box, plus the
-   border ring (border-box XOR padding-box), so element borders (table
-   grid lines) stay visible. */
+   A bar is a thick underline raised over the glyphs: the browser draws it
+   per line box, exactly as wide as that line's text, so a short last line
+   gets a short bar and a tall cell or a flex row of chips gets one bar per
+   line of text, not a filled box. The element's own background and
+   borders are left alone. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *, [data-skeleton="block"] *):is(
     :is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend):not(:has(img, svg, video, canvas, iframe, button, input, select, textarea, table, ul, ol, div, p, h1, h2, h3, h4, h5, h6, li, blockquote, [data-skeleton])),
     :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"]) *):not(:is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])) *),
     :not(:has(*)):not(:empty):not(img, svg, video, canvas, iframe, button, input, select, textarea, br, hr, [data-skeleton]):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"], :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton]))) *),
     [data-skeleton="text"]
   ) {
-  background-color: var(--vslk-sk-base);
-  background-image: var(--vslk-skz-image) !important;
-  background-size: 300% 100% !important;
-  background-repeat: no-repeat !important;
-  animation: var(--vslk-skz-anim) !important;
-  mask-image:
-    repeating-linear-gradient(to bottom, #000 0 calc(1lh - 0.3em), transparent calc(1lh - 0.3em) 1lh),
-    linear-gradient(#000 0 0),
-    linear-gradient(#000 0 0);
-  mask-position: 0 0.15em, 0 0, 0 0;
-  mask-repeat: repeat, no-repeat, no-repeat;
-  mask-origin: content-box, border-box, padding-box;
-  mask-clip: content-box, border-box, padding-box;
-  mask-composite: add, exclude, add;
+  --vslk-skz-color: var(--vslk-sk-base);
+  text-decoration: underline solid !important;
+  text-decoration-color: var(--vslk-skz-color) !important;
+  text-decoration-thickness: 0.9em !important;
+  text-underline-offset: -0.75em !important;
+  text-decoration-skip-ink: none !important;
+  mask-image: var(--vslk-skz-mask) !important;
+  mask-size: 300% 100% !important;
+  mask-repeat: no-repeat !important;
+  animation: var(--vslk-skz-text-anim) !important;
 }
 
 /* 3. Images and SVG become solid blocks of the same size and radius. */
@@ -89,6 +100,17 @@
    beats any stylesheet. visibility is inherited into the shadow tree. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(svg) * {
   visibility: hidden !important;
+}
+
+/* Icon fonts (<i class="mdi …">, Font Awesome) draw a glyph in ::before,
+   which the text rule above would erase, and CSS icons (Iconify, Nuxt UI)
+   are an empty element masked to the icon: both become a block in the
+   icon's own box, or shape. */
+:is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(i, [class*="icon"]):empty {
+  background-color: var(--vslk-sk-base);
+  background-image: var(--vslk-skz-image) !important;
+  background-size: 300% 100% !important;
+  animation: var(--vslk-skz-anim) !important;
 }
 
 /* 4. Controls become solid blocks of the same shape; their insides vanish. */
@@ -127,6 +149,14 @@
 @keyframes vslk-skz-pulse {
   0%, 100% { background-color: var(--vslk-sk-base); }
   50% { background-color: var(--vslk-sk-hi); }
+}
+@keyframes vslk-skz-shimmer-mask {
+  from { mask-position: 100% 0; }
+  to { mask-position: 0 0; }
+}
+@keyframes vslk-skz-pulse-text {
+  0%, 100% { --vslk-skz-color: var(--vslk-sk-base); }
+  50% { --vslk-skz-color: var(--vslk-sk-hi); }
 }
 
 @media (prefers-reduced-motion: reduce) {

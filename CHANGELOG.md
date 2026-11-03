@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- `v-skeleton` draws each line bar exactly as long as the text on that line,
+  so the last line of a paragraph gets a short bar. A table cell taller than
+  its text, or a flex row of badges or chips, now gets one bar per line of
+  text instead of a filled box, and the element keeps its own background.
+
+### Fixed
+
+- `v-skeleton` turns icon-font icons (Material Design Icons, Font Awesome)
+  and CSS icons (Iconify, Nuxt UI) into blocks. Icon fonts used to vanish
+  and leave an empty gap.
+
 ## [0.4.0] - 2026-10-25
 
 ### Added

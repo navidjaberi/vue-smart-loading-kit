@@ -67,27 +67,49 @@ describe("skeletonize (real browser)", () => {
 
   it("bars a div whose text is mixed with inline elements as one text block", async () => {
     await skeletonize();
-    expect(css(".mixed-auto").maskImage).toContain("repeating-linear-gradient");
-    expect(css(".mixed-b").maskImage).toBe("none");
+    expect(css(".mixed-auto").textDecorationLine).toBe("underline");
+    expect(css(".mixed-b").textDecorationLine).toBe("none");
   });
 
+  // the bar is a raised underline: the browser draws it per line, as wide as
+  // that line's text, so a short last line gets a short bar
   it("draws line bars on text blocks and text-only elements", async () => {
     await skeletonize();
     for (const sel of [".title", ".para", ".item", ".cell", ".label", ".name", ".role", ".mixed"]) {
-      expect(css(sel).maskImage, sel).toContain("repeating-linear-gradient");
+      expect(css(sel).textDecorationLine, sel).toBe("underline");
+      expect(css(sel).textDecorationColor, sel).not.toBe(TRANSPARENT);
+      expect(css(sel).textDecorationSkipInk, sel).toBe("none");
     }
+  });
+
+  it("paints no box behind a text block", async () => {
+    const before = css(".title").backgroundColor;
+    await skeletonize();
+    expect(css(".title").backgroundColor).toBe(before);
   });
 
   it("gives inline children of a text block no bar of their own", async () => {
     await skeletonize();
+    expect(css(".inline").textDecorationLine).toBe("none");
     expect(css(".inline").maskImage).toBe("none");
     expect(css(".link").maskImage).toBe("none");
+    // the link's own underline is hidden; the paragraph's bar runs through it
+    expect(css(".link").textDecorationColor).toBe(TRANSPARENT);
   });
 
-  it("keeps table cell borders (border ring in the mask)", async () => {
+  it("keeps table cell borders", async () => {
+    const before = css(".cell").borderTopColor;
     await skeletonize();
-    expect(css(".cell").maskComposite).toContain("exclude");
+    expect(css(".cell").borderTopColor).toBe(before);
     expect(css(".cell").borderTopWidth).toBe("2px");
+  });
+
+  // icon fonts draw in ::before, which the hidden text would erase
+  it("turns empty icon elements into blocks", async () => {
+    await skeletonize();
+    for (const sel of [".font-icon", ".css-icon"]) {
+      expect(css(sel).backgroundColor, sel).not.toBe(TRANSPARENT);
+    }
   });
 
   it("fills images and controls with the base color", async () => {
@@ -127,5 +149,6 @@ describe("skeletonize (real browser)", () => {
     await nextTick();
     expect(css(".title").color).toBe(before);
     expect(css(".title").maskImage).toBe("none");
+    expect(css(".title").textDecorationLine).toBe("none");
   });
 });
