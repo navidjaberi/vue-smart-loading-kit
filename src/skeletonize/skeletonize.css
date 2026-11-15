@@ -5,14 +5,16 @@
    never inside [data-skeleton="ignore"], and never change a size: the
    DOM is untouched and no rule alters box geometry.
 
-   background-color is deliberately not !important below: CSS animations
-   cannot override !important declarations, so the pulse keyframes would
-   never show. Animations do override normal page styles, so the bars
-   still win while animating. */
+   Colors are !important, so a page background that is itself !important
+   (Quasar's bg-* classes, Tailwind's ! modifier) can't show through. CSS
+   animations can't override an !important declaration, so the pulse
+   animates the registered --vslk-skz-color instead, which the !important
+   declarations read. */
 
 /* Animation, chosen on the root and read by every painted part. Blocks
-   animate their background; line bars are a text decoration, so they
-   shimmer through a moving mask and pulse through --vslk-skz-color. */
+   shimmer through their background image; line bars are a text decoration,
+   so they shimmer through a moving mask. Both pulse through
+   --vslk-skz-color. */
 @property --vslk-skz-color {
   syntax: "<color>";
   inherits: false;
@@ -37,7 +39,7 @@
   --vslk-skz-anim: vslk-skz-pulse var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
   --vslk-skz-mask: none;
   --vslk-skz-text: var(--vslk-sk-base);
-  --vslk-skz-text-anim: vslk-skz-pulse-text var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
+  --vslk-skz-text-anim: vslk-skz-pulse var(--vslk-sk-duration, 1500ms) ease-in-out infinite;
 }
 .vslk-skeletonize.vslk-skeletonize--none {
   --vslk-skz-image: none;
@@ -81,8 +83,8 @@
    borders are left alone. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *, [data-skeleton="block"] *):is(
     :is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend):not(:has(img, svg, video, canvas, iframe, button, input, select, textarea, table, ul, ol, div, p, h1, h2, h3, h4, h5, h6, li, blockquote, [data-skeleton])),
-    :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"]) *):not(:is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])) *),
-    :not(:has(*)):not(:empty):not(img, svg, video, canvas, iframe, button, input, select, textarea, br, hr, [data-skeleton]):not(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend, button, [data-skeleton="text"], :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton]))) *),
+    :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])):not(:is(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend):not(:has(img, svg, video, canvas, iframe, button, input, select, textarea, table, ul, ol, div, p, h1, h2, h3, h4, h5, h6, li, blockquote, [data-skeleton])), button, [data-skeleton="text"]) *):not(:is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton])) *),
+    :not(:has(*)):not(:empty):not(img, svg, video, canvas, iframe, button, input, select, textarea, br, hr, [data-skeleton]):not(:is(:is(p, h1, h2, h3, h4, h5, h6, li, dt, dd, td, th, label, blockquote, figcaption, caption, legend):not(:has(img, svg, video, canvas, iframe, button, input, select, textarea, table, ul, ol, div, p, h1, h2, h3, h4, h5, h6, li, blockquote, [data-skeleton])), button, [data-skeleton="text"], :is(div, span):has(*):not(:has(:not(a, abbr, b, bdi, bdo, br, cite, code, data, dfn, em, i, kbd, mark, q, s, samp, small, span, strong, sub, sup, time, u, var, wbr), [data-skeleton]))) *),
     [data-skeleton="text"]
   ) {
   --vslk-skz-color: var(--vslk-skz-text, var(--vslk-sk-base));
@@ -99,7 +101,8 @@
 
 /* 3. Images and SVG become solid blocks of the same size and radius. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(img, svg) {
-  background-color: var(--vslk-sk-base);
+  --vslk-skz-color: var(--vslk-sk-base);
+  background-color: var(--vslk-skz-color) !important;
   background-image: var(--vslk-skz-image) !important;
   background-size: 300% 100% !important;
   animation: var(--vslk-skz-anim) !important;
@@ -117,7 +120,8 @@
    are an empty element masked to the icon: both become a block in the
    icon's own box, or shape. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(i, [class*="icon"]):empty {
-  background-color: var(--vslk-sk-base);
+  --vslk-skz-color: var(--vslk-sk-base);
+  background-color: var(--vslk-skz-color) !important;
   background-image: var(--vslk-skz-image) !important;
   background-size: 300% 100% !important;
   animation: var(--vslk-skz-anim) !important;
@@ -125,7 +129,8 @@
 
 /* 4. Controls become solid blocks of the same shape; their insides vanish. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *):is(button, input, select, textarea, [role="button"]) {
-  background-color: var(--vslk-sk-base);
+  --vslk-skz-color: var(--vslk-sk-base);
+  background-color: var(--vslk-skz-color) !important;
   background-image: var(--vslk-skz-image) !important;
   background-size: 300% 100% !important;
   animation: var(--vslk-skz-anim) !important;
@@ -143,7 +148,8 @@
 
 /* 6. data-skeleton="block": one solid block, children hidden, size kept. */
 :is(.vslk-skeletonize, .vslk-skeletonize *):not([data-skeleton="ignore"], [data-skeleton="ignore"] *)[data-skeleton="block"] {
-  background-color: var(--vslk-sk-base);
+  --vslk-skz-color: var(--vslk-sk-base);
+  background-color: var(--vslk-skz-color) !important;
   background-image: var(--vslk-skz-image) !important;
   background-size: 300% 100% !important;
   animation: var(--vslk-skz-anim) !important;
@@ -157,16 +163,12 @@
   to { background-position: 0 0; }
 }
 @keyframes vslk-skz-pulse {
-  0%, 100% { background-color: var(--vslk-sk-base); }
-  50% { background-color: var(--vslk-sk-hi); }
+  0%, 100% { --vslk-skz-color: var(--vslk-sk-base); }
+  50% { --vslk-skz-color: var(--vslk-sk-hi); }
 }
 @keyframes vslk-skz-shimmer-mask {
   from { mask-position: 100% 0; }
   to { mask-position: 0 0; }
-}
-@keyframes vslk-skz-pulse-text {
-  0%, 100% { --vslk-skz-color: var(--vslk-sk-base); }
-  50% { --vslk-skz-color: var(--vslk-sk-hi); }
 }
 
 @media (prefers-reduced-motion: reduce) {
