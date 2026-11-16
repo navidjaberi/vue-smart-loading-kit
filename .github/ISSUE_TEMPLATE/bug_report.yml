@@ -1,0 +1,62 @@
+name: Bug report
+description: Something renders or behaves wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! A reproduction is the fastest way to a fix: fork the
+        [StackBlitz example](https://stackblitz.com/github/navidjaberi/vue-smart-loading-kit/tree/main/examples/stackblitz?file=src%2FApp.vue),
+        change it until the bug shows, and paste the link below.
+  - type: dropdown
+    id: feature
+    attributes:
+      label: What is affected?
+      multiple: true
+      options:
+        - v-skeleton
+        - Skeleton
+        - Spinner
+        - ProgressBar
+        - SmartLoader
+        - PageProgress
+        - Nuxt module (nuxt-smart-loading-kit)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: For v-skeleton, a screenshot of the real content and the skeleton side by side helps a lot.
+    validations:
+      required: true
+  - type: input
+    id: repro
+    attributes:
+      label: Reproduction link
+      placeholder: https://stackblitz.com/...
+  - type: input
+    id: ui-library
+    attributes:
+      label: UI library and version, if any
+      placeholder: e.g. Vuetify 4.3, PrimeVue 5.0, Quasar 2.35, Tailwind only
+  - type: input
+    id: version
+    attributes:
+      label: vue-smart-loading-kit version
+      placeholder: e.g. 0.5.2
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: e.g. Chrome 131, Safari 18.1, Firefox 133
+    validations:
+      required: true
+  - type: input
+    id: framework
+    attributes:
+      label: Vue (and Nuxt) version
+      placeholder: e.g. Vue 3.5.13, Nuxt 4.1
