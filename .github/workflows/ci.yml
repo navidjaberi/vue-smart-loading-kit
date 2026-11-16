@@ -25,7 +25,9 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:coverage
-      - run: npx playwright install --with-deps chromium
+      # Chromium, Firefox and WebKit: the skeleton CSS leans on features
+      # (@property, relative colors, underline offsets) engines differ on
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:browser
       - run: npm run build
       - run: npm run build:playground
