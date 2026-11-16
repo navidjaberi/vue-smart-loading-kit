@@ -41,7 +41,13 @@ async function skeletonize() {
 const TRANSPARENT = "rgba(0, 0, 0, 0)";
 
 describe("skeletonize (real browser)", () => {
+  // Safari on macOS draws an unstyled <button> natively and drops that look,
+  // a few px taller, once its background changes (see README, Limitations).
+  // Measure the rest of the layout with the fixture's button already non-native.
+  const macWebKit = /Macintosh/.test(navigator.userAgent) && !/Chrome|Firefox/.test(navigator.userAgent);
+
   it("does not move or resize a single element", async () => {
+    if (macWebKit) q(".button").style.appearance = "none";
     const before = rects();
     await skeletonize();
     expect(rects()).toEqual(before);
