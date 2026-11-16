@@ -41,7 +41,7 @@ jobs:
       - run: npm run test:mutation -- --concurrency 4
       - run: node scripts/mutation-badge.mjs
       - run: cp -r reports/mutation playground/dist/mutation
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v3
         with:
           path: playground/dist
