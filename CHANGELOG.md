@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `v-skeleton` bars text wrapped inside table cells, such as Element Plus's
+  `td > div.cell` and PrimeVue's header cells (`th > div > span`). That text
+  used to get no bar at all.
+- Backgrounds set with `!important`, such as Quasar's `bg-*` classes
+  (`<q-btn color="primary">`) or Tailwind's `!` modifier, no longer show
+  through skeleton blocks.
+
+Found by testing `v-skeleton` on PrimeVue, Quasar and Element Plus.
+
 ## [0.5.1] - 2026-11-03
 
 ### Fixed

@@ -107,6 +107,22 @@ describe("skeletonize (real browser)", () => {
     expect(css(".link").textDecorationColor).toBe(TRANSPARENT);
   });
 
+  // component libraries wrap cell text (Element Plus: td > div.cell,
+  // PrimeVue: th > div > span); the wrapper gets the bar, once
+  it("bars text wrapped inside table cells", async () => {
+    await skeletonize();
+    expect(css(".td-inner").textDecorationLine).toBe("underline");
+    expect(css(".th-inner").textDecorationLine).toBe("underline");
+    expect(css(".th-title").textDecorationLine).toBe("none");
+    expect(css(".td-cell").textDecorationLine).toBe("none");
+  });
+
+  // Quasar's bg-* classes and Tailwind's ! modifier set !important backgrounds
+  it("covers a background that is itself !important", async () => {
+    await skeletonize();
+    expect(css(".imp-bg").backgroundColor).not.toBe("rgb(37, 99, 235)");
+  });
+
   it("keeps table cell borders", async () => {
     const before = css(".cell").borderTopColor;
     await skeletonize();

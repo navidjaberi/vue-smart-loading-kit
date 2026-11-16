@@ -556,7 +556,9 @@ While skeletonized, the element is `inert` and `aria-hidden` (fake or stale cont
 * A few characters on a colored shape (initials avatars, badges) get a short bar on top of the shape. Mark them `data-skeleton="block"` to turn the whole shape into one block.
 * `video`, `canvas` and `iframe` are hidden but keep their space. Wrap them in `data-skeleton="block"` for a solid block.
 * An icon is recognized as an empty `<i>` or an empty element with `icon` in its class (Material Design Icons, Font Awesome, Iconify, Nuxt UI). Any other empty element drawing an icon with `::before` keeps its space but shows nothing; mark it `data-skeleton="block"`.
-* Requires evergreen browsers from late 2023 on, for `:has()`. The pulse animation of the text bars also needs `@property` (Firefox 128+); older browsers show those bars without the pulse.
+* Text that sits right next to an element in the same container, as in `<div><Avatar /> Ada Lovelace</div>`, gets no bar: CSS can't select a bare text node. Wrap the text in a `<span>`.
+* `v-skeleton` needs a single root element. On a component with several root nodes (some menus and overlays, such as PrimeVue's `<Menu>`), Vue ignores the directive and warns; put it on a wrapping `<div>` instead.
+* Requires evergreen browsers from late 2023 on, for `:has()`. The pulse animation also needs `@property` (Firefox 128+); older browsers switch between the two colors instead of fading.
 
 ---
 
