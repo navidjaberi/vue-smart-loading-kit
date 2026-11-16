@@ -558,6 +558,7 @@ While skeletonized, the element is `inert` and `aria-hidden` (fake or stale cont
 * An icon is recognized as an empty `<i>` or an empty element with `icon` in its class (Material Design Icons, Font Awesome, Iconify, Nuxt UI). Any other empty element drawing an icon with `::before` keeps its space but shows nothing; mark it `data-skeleton="block"`.
 * Text that sits right next to an element in the same container, as in `<div><Avatar /> Ada Lovelace</div>`, gets no bar: CSS can't select a bare text node. Wrap the text in a `<span>`.
 * `v-skeleton` needs a single root element. On a component with several root nodes (some menus and overlays, such as PrimeVue's `<Menu>`), Vue ignores the directive and warns; put it on a wrapping `<div>` instead.
+* In Safari on macOS, a completely unstyled `<button>` (the browser's native look) grows a few pixels while skeletonized: Safari drops the native look as soon as a button's background changes, and draws it with different padding. Buttons with any styling of their own, including every UI library's, are not affected. Give a bare button `appearance: none`, or a background or border of its own, if this matters.
 * Requires evergreen browsers from late 2023 on, for `:has()`. The pulse animation also needs `@property` (Firefox 128+); older browsers switch between the two colors instead of fading.
 
 ---
