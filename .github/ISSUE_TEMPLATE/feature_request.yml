@@ -1,0 +1,16 @@
+name: Feature request
+description: An idea for a new option, variant or component
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The loading state or case you're building, and where the kit falls short today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to see?
+      description: An API sketch or a screenshot of a similar UI is welcome.
