@@ -1,7 +1,7 @@
 version: 2
 updates:
   # One weekly PR per directory for minor and patch updates, so they don't
-  # pile up; majors still come one by one.
+  # pile up; majors still come one by one. GitHub Actions come as one PR.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -20,3 +20,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
