@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-16
+
 ### Fixed
 
 - `v-skeleton` bars text wrapped inside table cells, such as Element Plus's
@@ -196,7 +198,8 @@ Found by testing `v-skeleton` on PrimeVue, Quasar and Element Plus.
 
 - Initial release: `Skeleton` (13 variants) and `Spinner` (8 variants).
 
-[Unreleased]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/navidjaberi/vue-smart-loading-kit/compare/v0.3.4...v0.4.0
