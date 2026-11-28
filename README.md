@@ -1,6 +1,6 @@
 # Vue Smart Loading Kit
 
-Turn your real Vue components into their own skeleton with one directive, plus spinners, progress bars and a loader that never flashes.
+An MIT-licensed Vue 3 and TypeScript toolkit for loading states, with skeletons, spinners, SmartLoader and PageProgress. I built the CSS-based `v-skeleton` directive after running into limitations with Vuetify skeletons while working at Dongi. The toolkit supports Nuxt and SSR, and SmartLoader helps reduce visible flicker during short requests. GitHub Actions runs unit and real-browser tests, and the demo publishes the Stryker mutation report.
 
 ```vue
 <UserCard v-skeleton="loading" :user="user" />
